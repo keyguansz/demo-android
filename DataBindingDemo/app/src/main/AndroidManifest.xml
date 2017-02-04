@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest package="key.android.demo.databindingdemo"
+          xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".activity.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.CombineActivity">
+            <intent-filter>
+                <action android:name="key.databinding.action.Combine"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.NormalObjectActivity">
+            <intent-filter>
+                <action android:name="key.databinding.action.NormalObject"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.ObserverActivity">
+            <intent-filter>
+                <action android:name="key.databinding.action.Observer"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.ObserverCollectionActivity">
+            <intent-filter>
+                <action android:name="key.databinding.action.ObserverCollection"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.ViewStubActivity">
+            <intent-filter>
+                <action android:name="key.databinding.action.ViewStub"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.AttributeSettersActivity">
+            <intent-filter>
+                <action android:name="key.databinding.action.AttributeSetters"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.EventActivity">
+            <intent-filter>
+                <action android:name="key.databinding.action.Event"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.ConvertersActivity">
+            <intent-filter>
+                <action android:name="key.databinding.action.Converters"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.DemoActivity">
+            <intent-filter>
+                <action android:name="key.databinding.action.Demo"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".activity.TwoWayActivity">
+            <intent-filter>
+                <action android:name="key.databinding.action.TwoWay"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+
+
+
+
+
+    </application>
+
+</manifest>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable
+            name="item3"
+            type="key.android.demo.databindingdemo.model.RecyclerItem"/>
+
+        <variable
+            name="presenter"
+            type="key.android.demo.databindingdemo.handler.Presenter"/>
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btn_item"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAllCaps="false"
+            android:text="@{item3.type}"
+           android:onClick="@{() -> presenter.onTypeClick(context, item3)}"
+            android:layout_gravity="center"/>
+    </LinearLayout>
+
+</layout>
