@@ -2,6 +2,12 @@
 <manifest package="key.android.demo.FitDemo"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <supports-screens
+        android:anyDensity="false"
+        android:largeScreens="false"
+        android:normalScreens="false"
+        android:smallScreens="false"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,24 +15,29 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".activity.DemoActivity">
-
         </activity>
         <activity android:name=".activity.Dot9Activity">
+
+        </activity>
+        <activity
+            android:name=".percent.MainActivity"
+            android:label="@string/app_name">
+
+            <!--
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            -->
+        </activity>
+        <activity android:name=".activity.ConfigChangesActivity"
+                  android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name=".percent.MainActivity"
-            android:label="@string/app_name" >
-           <!-- <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>-->
-        </activity>
-
     </application>
 
 </manifest>
