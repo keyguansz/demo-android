@@ -31,7 +31,14 @@
             </intent-filter>
             -->
         </activity>
+        <!--固定屏幕方向
+         android:screenOrientation="portrait" 竖屏
+android:screenOrientation="landscape " 横屏
+android:screenOrientation="unspecified" 未指明方向
+-->
+
         <activity android:name=".activity.ConfigChangesActivity"
+                  android:screenOrientation="portrait"
                   android:configChanges="keyboardHidden|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

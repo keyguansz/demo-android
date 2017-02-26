@@ -1,6 +1,7 @@
 package key.android.demo.FitDemo.activity;
 
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,7 +14,14 @@ public class ConfigChangesActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);// 横屏
         setContentView(R.layout.activity_config_changes);
+        /**
+         *@desc
+         *@ref:http://blog.csdn.net/chaoyu168/article/details/51005765
+         *@author : key.guan @ 2017/2/26 21:59
+         */
+
         Log.i(TAG,"onCreate");
     }
 
