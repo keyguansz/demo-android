@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--所有在cs中定义过的资源，在无限定符也要追加一个默认值，避免运行在不同屏幕下，资源无法找到-->
+<resources>
+        <dimen name="dp_50_in_cs5">50dp</dimen>
+        <dimen name="ve_phantom_40_phone_dp">30dp</dimen>
+        <dimen name="tabhost_marginLeft_160_in_cs">0dp</dimen>
+</resources>
