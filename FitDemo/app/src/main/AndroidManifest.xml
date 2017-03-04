@@ -15,44 +15,31 @@
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen">
         <activity android:name=".activity.DemoActivity">
-
         </activity>
         <activity android:name=".activity.Dot9Activity">
         </activity>
         <activity
             android:name=".percent.MainActivity"
             android:label="@string/app_name">
-
-            <!--
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            -->
         </activity>
-        <!--
-固定屏幕方向
-         android:screenOrientation="portrait" 竖屏
-android:screenOrientation="landscape " 横屏
-android:screenOrientation="unspecified" 未指明方向
-        -->
-
         <activity
             android:name=".activity.ConfigChangesActivity"
             android:configChanges="keyboardHidden|orientation"
             android:screenOrientation="portrait">
         </activity>
         <activity android:name=".activity.QualifierActivity">
+        </activity>
+        <activity android:name=".activity.TmpActivity">
+        </activity>
+        <activity android:name=".activity.ScaleTypeActivity">
+
+        </activity>
+        <activity android:name=".activity.QualifierMatchActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-
-        </activity>
-        <activity android:name=".activity.TmpActivity">
-
         </activity>
     </application>
 
