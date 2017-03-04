@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#ffffff"
+   >
+    <TextView
+        android:id="@+id/marquee_grad_tv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:textSize="20sp"
+        android:text="paomadneg xiaoguo123456789"
+        android:textColor="#00ff00"/>
+
+    <View
+        android:layout_alignLeft="@id/marquee_grad_tv"
+        android:layout_width="20dp"
+        android:layout_height="match_parent"
+        android:background="@drawable/marquee_grad_fg_white_l2r"
+        />
+    <View
+        android:layout_alignRight="@id/marquee_grad_tv"
+        android:layout_width="20dp"
+        android:layout_height="match_parent"
+        android:background="@drawable/marquee_grad_fg_white_r2l"
+        />
+</RelativeLayout>
+
+

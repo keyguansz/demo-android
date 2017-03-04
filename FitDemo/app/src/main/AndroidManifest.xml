@@ -13,8 +13,9 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen">
         <activity android:name=".activity.DemoActivity">
+
         </activity>
         <activity android:name=".activity.Dot9Activity">
         </activity>
@@ -43,14 +44,15 @@ android:screenOrientation="unspecified" 未指明方向
             android:screenOrientation="portrait">
         </activity>
         <activity android:name=".activity.QualifierActivity">
-
-        </activity>
-        <activity android:name=".activity.TmpActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
+        </activity>
+        <activity android:name=".activity.TmpActivity">
+
         </activity>
     </application>
 
