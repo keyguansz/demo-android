@@ -32,15 +32,16 @@
         <activity android:name=".activity.TmpActivity">
         </activity>
         <activity android:name=".activity.ScaleTypeActivity">
+
+        </activity>
+        <activity android:name=".activity.QualifierMatchActivity">
+        </activity>
+        <activity android:name=".activity.ZsTestActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-        </activity>
-        <activity android:name=".activity.QualifierMatchActivity">
-        </activity>
-        <activity android:name=".activity.ZsTestActivity">
         </activity>
     </application>
 
