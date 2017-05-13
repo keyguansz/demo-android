@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    >
+
+    <key.android.demo.uidemo.activity.MarqueeGradView
+        android:layout_width="400dp"
+        android:layout_height="40dp"
+        android:background="#ffffff"
+       />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="底部按钮按钮"
+        android:layout_alignParentBottom="true"/>
+    <TextView
+        android:layout_margin="40dp"
+        android:id="@+id/show_dlg"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:text="show_dlg"
+        />
+</RelativeLayout>
+

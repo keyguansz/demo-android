@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        is-multidex="false"
+        jar="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\exploded-aar\com.android.support\recyclerview-v7\24.0.0\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="894922f67adeaaef51f077a29e315da21a3382d3">
+        <dex dex="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\pre-dexed\debug\com.android.support-recyclerview-v7-24.0.0_646d6b47d083d97a63f3f3f5aee824815fcd09dd.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\23.4.0\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="548f06de403a9409f00554b3ee12a9fdea0e236c">
+        <dex dex="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\pre-dexed\debug\com.android.support-appcompat-v7-23.4.0_762a94fd9597d14a05a4d32d6fc9c28f347be15c.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\exploded-aar\com.android.support\support-v4\24.0.0\jars\libs\internal_impl-24.0.0.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="fcaf463e10e69c1923ccf1edeba3b4196d239e00">
+        <dex dex="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\pre-dexed\debug\internal_impl-24.0.0_4c52c93600efa552aaf2b67d4ad84780366ecee3.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\exploded-aar\com.android.support\support-vector-drawable\23.4.0\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="c2c594cace5d83a3227b2b6e658ecbfd586d3ed9">
+        <dex dex="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\pre-dexed\debug\com.android.support-support-vector-drawable-23.4.0_8c66ae87e7ba21eb4deb614f3040638630e34e1a.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\exploded-aar\com.android.support\animated-vector-drawable\23.4.0\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="de4db3785756bfb0915a9f59a9b3f2fea7407be4">
+        <dex dex="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\pre-dexed\debug\com.android.support-animated-vector-drawable-23.4.0_defdd002ac8f4f2f73f412334789e8accefec0a8.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\exploded-aar\com.android.databinding\library\1.2.1\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="957dc30b1495f8689271e00d56ab09cc9192df02">
+        <dex dex="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\pre-dexed\debug\com.android.databinding-library-1.2.1_5d452e254262c5c77af64c941e8d2a5b180d5cc0.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\key.guan\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\24.0.0\support-annotations-24.0.0.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="2943c74db6d4346ab8c6531adac91fa05c137c40">
+        <dex dex="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\pre-dexed\debug\support-annotations-24.0.0_f99ce25306e87df31dcb56ca17a753040eae2c34.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\key.guan\.gradle\caches\modules-2\files-2.1\com.android.databinding\baseLibrary\2.2.2\5e227e2d794cf680dd34fb04dd564ce58d6c764d\baseLibrary-2.2.2.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="5e227e2d794cf680dd34fb04dd564ce58d6c764d">
+        <dex dex="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\pre-dexed\debug\baseLibrary-2.2.2_5a37e1a38f3093b2410f97f2b1c1c951a75a4b99.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\key.guan\.gradle\caches\modules-2\files-2.1\com.github.bumptech.glide\glide\3.7.0\9e9eeaf9948ee4d6c3ab354e8dc14368f16994a4\glide-3.7.0.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="9e9eeaf9948ee4d6c3ab354e8dc14368f16994a4">
+        <dex dex="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\pre-dexed\debug\glide-3.7.0_ea1e47ce3f29e00c9ab15c443684688e25c5902d.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\exploded-aar\com.android.databinding\adapters\1.2.1\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="c56d29136c2257f63f08c29c4e739efb03b06c7d">
+        <dex dex="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\pre-dexed\debug\com.android.databinding-adapters-1.2.1_b81c80e48a3aad16cd3dd54da577b06384515faf.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\exploded-aar\com.android.support\support-v4\24.0.0\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="24.0.2"
+        sha1="2f7e6e2dad1bccaf68a8820820adc6c0d5b96d37">
+        <dex dex="F:\key.guan\kgszgt\DataBindingDemo-master\PreferenceFragmentDemo\app\build\intermediates\pre-dexed\debug\com.android.support-support-v4-24.0.0_e53470ae3008d9decaa7721f186b9dec65c35b91.jar" />
+    </item>
+
+</items>
