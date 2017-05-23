@@ -19,10 +19,20 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    signingConfigs{
+        kConfig{
+            storeFile file ('k.jks')//签名文件路径，保持在当前文件的路径即可
+            //keystore的路径通常使用项目根目录的相对路径，但也可以是使用绝对路径，尽管这不推荐
+            storePassword '123456' //密码
+            keyAlias 'k'
+            keyPassword '123456'  //密码
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.kConfig // 配置release包的签名,必须要在signingConfigs的定义之后
             //只针对release版本进行配置
             applicationVariants.all {
                 variant ->
@@ -81,4 +91,7 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(path: ':klib')
+    debugCompile project(path: ':klib', configuration: 'debug')
+    releaseCompile project(path: ':klib', configuration: 'release')
 }
