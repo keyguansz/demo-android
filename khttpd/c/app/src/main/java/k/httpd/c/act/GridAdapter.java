@@ -8,8 +8,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
-import k.art.R;
+
 import k.core.util.kil.KImgLoader;
+import k.httpd.c.act.dshare.dji.R;
 
 /**
  *@desc
@@ -19,7 +20,7 @@ import k.core.util.kil.KImgLoader;
 
 public class GridAdapter extends BaseAdapter {
     public static final String TAG = "GridAdapter";
-    private
+
 
     Context mContext;
 

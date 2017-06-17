@@ -33,7 +33,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import k.art.R;
 import k.core.util.KUtils;
 
 public class ImageLoader {
@@ -48,7 +47,7 @@ public class ImageLoader {
     private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
     private static final long KEEP_ALIVE = 10L;
 
-    private static final int TAG_KEY_URI = R.id.imageloader_uri;
+    private static final int TAG_KEY_URI = 5111616;
     private static final long DISK_CACHE_SIZE = 1024 * 1024 * 50;
     private static final int IO_BUFFER_SIZE = 8 * 1024;
     private static final int DISK_CACHE_INDEX = 0;

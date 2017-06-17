@@ -8,12 +8,12 @@ import java.io.InputStream;
 import java.util.Map;
 
 
-public class SimpleServer extends NanoHTTPD {
+public class DshareServer extends NanoHTTPD {
 	AssetManager asset_mgr;
 
-	public SimpleServer() {
-		// 端口是8088，也就是说要通过http://127.0.0.1:8088来访当问
-		super(8088);
+	public DshareServer() {
+		// 端口是8888，也就是说要通过http://127.0.0.1:8088来访当问
+		super(8888);
 	}
 
 	public Response serve(String uri, Method method,
@@ -52,10 +52,8 @@ public class SimpleServer extends NanoHTTPD {
 			e.printStackTrace();
 		}
 
-		parameters.get("mtd");
-
 		// 将读取到的文件内容返回给浏览器
-		return new NanoHTTPD.Response(new String(buffer,0,len));
+		return new Response(new String(buffer,0,len));
 
 	}
 }

@@ -33,9 +33,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import k.art.R;
+
 import k.core.util.KLogUtil;
 import k.core.util.KUtils;
+import k.httpd.c.act.dshare.dji.R;
 
 /**
  * @author : key.guan @ 2017/6/15 17:33
@@ -82,7 +83,7 @@ public final class KImgLoader {
     private LruCache<String, Bitmap> mMemoryCache;
     private DiskLruCache mDiskLruCache;
 
-    private static final int TAG_KEY_URI = R.id.imageloader_uri;
+    private static final int TAG_KEY_URI = 99995959;
     private static final long DISK_CACHE_SIZE = 1024 * 1024 * 50;
     private static final int IO_BUFFER_SIZE = 8 * 1024;
     private static final int DISK_CACHE_INDEX = 0;
