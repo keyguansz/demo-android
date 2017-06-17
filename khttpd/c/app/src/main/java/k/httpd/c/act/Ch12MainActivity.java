@@ -12,6 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import org.xutils.common.Callback;
 import org.xutils.http.RequestParams;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +42,8 @@ public class Ch12MainActivity extends Activity {
     private void initView() {
         GridView gv = (GridView) findViewById(R.id.gv);
         gv.setAdapter(new GridAdapter(this));
-        getFileList();
+        //getFileList();
+        downlaod();
     }
     //获取文件列表
     public void getFileList(){
@@ -53,6 +55,29 @@ public class Ch12MainActivity extends Activity {
                 RetModel  ret =_gson.fromJson(jsonString, RetModel.class);
                 ArrayList<FileInfoModel>  ls =_gson.fromJson(ret.getMsg(), new TypeToken<List<FileInfoModel>>(){}.getType());
                 showLongToast(ls.get(0).toString());
+
+            }
+            @Override
+            public void onCancelled(Callback.CancelledException arg0) {
+                showLongToast("onCancelled");
+            }
+            @Override
+            public void onError(Throwable t, boolean arg1) {
+                showLongToast("onError");
+            }
+            @Override
+            public void onFinished() {
+                showLongToast("onFinished");
+            }
+        });
+    }
+    //获取文件列表
+    public void downlaod(){
+        RequestParams params=new RequestParams(Config.SERVER_IP+ IActionSet.Download);
+        org.xutils.x.http().get(params, new Callback.CommonCallback<File>() {
+            @Override
+            public void onSuccess(File jsonString) {
+                showLongToast("jsonString="+jsonString);
 
             }
             @Override

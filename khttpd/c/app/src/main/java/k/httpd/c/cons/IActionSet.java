@@ -6,4 +6,5 @@ package k.httpd.c.cons;
 
 public interface IActionSet {
     String getFileList = "getFileList";
+    String Download = "Download";
 }

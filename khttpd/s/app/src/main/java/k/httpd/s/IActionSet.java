@@ -6,4 +6,5 @@ package k.httpd.s;
 
 interface IActionSet {
     String getFileList = "getFileList";
+    String Download = "Download";
 }

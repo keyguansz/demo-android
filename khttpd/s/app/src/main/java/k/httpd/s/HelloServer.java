@@ -33,12 +33,17 @@ package k.httpd.s;
  * #L%
  */
 
+import android.os.Environment;
 import android.os.SystemClock;
 import android.text.TextUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -47,20 +52,23 @@ import org.nanohttpd.protocols.http.IHTTPSession;
 import org.nanohttpd.protocols.http.NanoHTTPD;
 import org.nanohttpd.protocols.http.request.Method;
 import org.nanohttpd.protocols.http.response.Response;
+import org.nanohttpd.protocols.http.response.Status;
 import org.nanohttpd.util.ServerRunner;
 
 import k.httpd.s.cons.Config;
 import k.httpd.s.model.FileInfoModel;
 import k.httpd.s.model.RetModel;
 
+import static org.nanohttpd.protocols.http.response.Response.newChunkedResponse;
+
 /**
  * An example of subclassing NanoHTTPD to make a custom HTTP server.
  */
 public class HelloServer extends NanoHTTPD {
-    protected Gson _gson =  new GsonBuilder()
+    protected Gson _gson = new GsonBuilder()
             .setDateFormat("yyyy-MM-dd HH:mm:ss")
             .create();
-     private RetModel rt = new RetModel();
+    private RetModel rt = new RetModel();
 
     /**
      * logger to log to.
@@ -82,30 +90,46 @@ public class HelloServer extends NanoHTTPD {
         HelloServer.LOG.info(method + " '" + uri + "' ");//// TODO: 2017/6/17 为何请求的是两次？
 
         Map<String, String> parms = session.getParms();
-        String rt = getAction(uri, parms);
-        return Response.newFixedLengthResponse(rt);
+        return handleAction(uri, parms);
+
     }
 
-    private String getAction(String uri, Map<String, String> param) {
-        if ( TextUtils.isEmpty(uri) || uri.length() <= 1){
-            return "";
+    private Response handleAction(String uri, Map<String, String> param) {
+        if (TextUtils.isEmpty(uri) || uri.length() <= 1) {
+            return null;
         }
         String action = uri.substring(1);
-        if ( action.equals(IActionSet.getFileList) ) {
-            return handleGetFileList(param);
+        if (action.equals(IActionSet.getFileList)) {
+            return Response.newFixedLengthResponse(handleGetFileList(param));
+        } else if (action.equals(IActionSet.Download)) {
+            return handleDownload(param);
         }
-        return "";
+        return null;
+    }
+
+    private Response handleDownload(Map<String, String> param) {
+        InputStream inputStream;
+        Response response = null;
+        try {
+
+            inputStream = new FileInputStream(new File(Environment.getExternalStorageDirectory().getPath()+"/ScreenShots/1.png"));
+            response = newChunkedResponse(Status.OK, "application/octet-stream", inputStream);//这代表任意的二进制数据传输。
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        response.addHeader("Content-Disposition", "attachment; filename=" + "test.java");
+        return response;
     }
 
     private String handleGetFileList(Map<String, String> param) {
         ArrayList<FileInfoModel> rtLs = new ArrayList<>(Config.pageSize);
         int pageId = 0;
-     //   File f = new File(Config.FileDir);
-      //  if (f.listFiles())
-        for (int i = 0;i < Config.pageSize;i++){
+        //   File f = new File(Config.FileDir);
+        //  if (f.listFiles())
+        for (int i = 0; i < Config.pageSize; i++) {
             FileInfoModel model = new FileInfoModel();
             model.len = 100 + i * 500;
-            model.path = "path"+i;
+            model.path = "path" + i;
             model.mtime = SystemClock.currentThreadTimeMillis();
             rtLs.add(model);
         }

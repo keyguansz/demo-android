@@ -45,15 +45,17 @@ public class MainActivity extends Activity {
 	private void testV2() {
 		server2 = new HelloServer();
 		try {
-
-
 			// 启动web服务
 			server2.start();
-
 			Log.i("Httpd", "The server started.");
 		} catch(IOException ioe) {
 			Log.w("Httpd", "The server could not start.");
 		}
+	}
+	private void testV3() {
+		/*ServerConfig serverConfig = new ServerConfig();
+		serverConfig.getRouter().addMapper("", DemoController.class);
+		new WebServerBuilder.Builder().serverConfig(serverConfig).build().startWithThread();*/
 	}
 
 	@Override
