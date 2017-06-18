@@ -21,22 +21,28 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-
+import k.core.util.DJITextUtil;
 import k.core.util.KLogUtil;
 import k.core.util.KUtils;
-import k.httpd.c.act.dshare.dji.R;
+
+import static java.lang.System.in;
 
 /**
  * @author : key.guan @ 2017/6/15 17:33
@@ -302,6 +308,55 @@ public final class KImgLoader {
             KUtils.close(in);
         }
         return false;
+    }
+    public static String downToStr( String urlStr )
+    {
+        String htmlStr = "";
+        HttpURLConnection conn = null;
+        InputStream inStream = null;
+        boolean LoadFlagErrFlag = false;
+        try
+        {
+            // URL url= new URL(Constant.REMOTE_ALBUM_PATH+"test2.html"); 模拟;
+            URL url = new URL(urlStr);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setConnectTimeout(5 * 1000);
+            conn.setDoInput(true);
+            conn.connect();
+            if (conn.getResponseCode() != HttpURLConnection.HTTP_OK)
+            {
+                LOG_D("http fail fail fail fail");
+                conn.disconnect();
+                conn = null;
+                return "";
+            }
+            inStream = conn.getInputStream();
+            int len = 1024;
+            if (len <= 0){
+                return "";
+            }
+            byte[] htmlBuffer = new byte[len];
+            int offset = 0;
+            int numRead = 0;
+            while (offset < htmlBuffer.length&& (numRead = inStream.read(htmlBuffer, offset,htmlBuffer.length - offset)) >= 0)
+            {
+                offset += numRead;
+            }
+
+         //   log.d("parse response "," listHtml size = " + conn.getContentLength()+ " hasread = " + htmlBuffer.length);
+            htmlStr = DJITextUtil.getString(htmlBuffer, "UTF-8");
+          //  log.d(htmlStr);
+          //  inStream.close();
+            return htmlStr;
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }finally {
+            if(conn!=null)conn.disconnect();
+            KUtils.close(inStream);
+
+        }
+      return "";
     }
 
     private String hashKey(String url) {

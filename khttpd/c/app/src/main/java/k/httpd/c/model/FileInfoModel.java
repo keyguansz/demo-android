@@ -1,10 +1,12 @@
 package k.httpd.c.model;
 
+import java.util.ArrayList;
+
 /**
  * Created by key on 2017/6/17.
  */
 
-public final class FileInfoModel {
+public final class FileInfoModel extends ArrayList<FileInfoModel> {
     public String path;
     public long len;
     public long mtime;//修改时间

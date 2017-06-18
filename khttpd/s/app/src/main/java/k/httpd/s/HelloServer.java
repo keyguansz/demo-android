@@ -33,20 +33,15 @@ package k.httpd.s;
  * #L%
  */
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Environment;
-import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.logging.Logger;
 
 import org.nanohttpd.protocols.http.IHTTPSession;
 import org.nanohttpd.protocols.http.NanoHTTPD;
@@ -54,6 +49,17 @@ import org.nanohttpd.protocols.http.request.Method;
 import org.nanohttpd.protocols.http.response.Response;
 import org.nanohttpd.protocols.http.response.Status;
 import org.nanohttpd.util.ServerRunner;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.logging.Logger;
 
 import k.httpd.s.cons.Config;
 import k.httpd.s.model.FileInfoModel;
@@ -68,6 +74,7 @@ public class HelloServer extends NanoHTTPD {
     protected Gson _gson = new GsonBuilder()
             .setDateFormat("yyyy-MM-dd HH:mm:ss")
             .create();
+    private KFileScanner mKFileScanner = new KFileScanner();
     private RetModel rt = new RetModel();
 
     /**
@@ -100,7 +107,10 @@ public class HelloServer extends NanoHTTPD {
         }
         String action = uri.substring(1);
         if (action.equals(IActionSet.getFileList)) {
-            return Response.newFixedLengthResponse(handleGetFileList(param));
+            String rt = handleGetFileList(param);
+          //  Response response = new Response(Status.OK,"application/json",rt);
+           return  Response.newFixedLengthResponse(Status.OK,"application/json",rt);
+          //  return Response.newFixedLengthResponse(handleGetFileList(param));
         } else if (action.equals(IActionSet.Download)) {
             return handleDownload(param);
         }
@@ -110,9 +120,9 @@ public class HelloServer extends NanoHTTPD {
     private Response handleDownload(Map<String, String> param) {
         InputStream inputStream;
         Response response = null;
+        if ( param ==null || param.containsKey("path")) return response;
         try {
-
-            inputStream = new FileInputStream(new File(Environment.getExternalStorageDirectory().getPath()+"/ScreenShots/1.png"));
+            inputStream = new FileInputStream(new File(param.get("path")));
             response = newChunkedResponse(Status.OK, "application/octet-stream", inputStream);//这代表任意的二进制数据传输。
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -126,14 +136,21 @@ public class HelloServer extends NanoHTTPD {
         int pageId = 0;
         //   File f = new File(Config.FileDir);
         //  if (f.listFiles())
-        for (int i = 0; i < Config.pageSize; i++) {
+      /*  for (int i = 0; i < Config.pageSize; i++) {
             FileInfoModel model = new FileInfoModel();
             model.len = 100 + i * 500;
             model.path = "path" + i;
             model.mtime = SystemClock.currentThreadTimeMillis();
             rtLs.add(model);
-        }
+        }*/
+        rtLs = mKFileScanner.start();
         rt.setMsg(_gson.toJson(rtLs));
+        int i = 0;
+        Log.e("TEst","model#" + (i++) + ": " + rtLs.size());
+       /* for (FileInfoModel model : rtLs){
+            Log.e("TEst","model#" + (i++) + ": " + model);
+        }*/
         return _gson.toJson(rt);
     }
+
 }
