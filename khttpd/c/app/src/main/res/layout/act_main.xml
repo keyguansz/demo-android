@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:orientation="vertical">
+   <LinearLayout
+       android:layout_width="match_parent"
+       android:layout_height="60dp">
+      <TextView
+          android:layout_marginLeft="5dp"
+          android:id="@+id/getFileList_image"
+          android:textColor="@android:color/holo_red_light"
+          android:layout_width="wrap_content"
+          android:gravity="center"
+          android:text="getFileList_image"
+          android:layout_height="60dp"/>
+      <TextView
+          android:layout_marginLeft="5dp"
+          android:id="@+id/getFileList_video"
+          android:gravity="center"
+          android:textColor="@android:color/holo_red_light"
+          android:layout_width="wrap_content"
+          android:text="getFileList_video"
+          android:layout_height="60dp"/>
+      <TextView
+          android:layout_marginLeft="5dp"
+          android:id="@+id/reset"
+          android:gravity="center"
+          android:visibility="gone"
+          android:textColor="@android:color/holo_red_light"
+          android:layout_width="50dp"
+          android:text="reset"
+          android:layout_height="60dp"/>
+   </LinearLayout>
+
+   <LinearLayout
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content">
+      <GridView
+          android:id="@+id/gv_image"
+          android:numColumns="3"
+          android:layout_width="0dp"
+          android:layout_weight="1"
+          android:layout_height="wrap_content"/>
+      <GridView
+          android:id="@+id/gv_video"
+          android:numColumns="2"
+          android:layout_width="0dp"
+          android:layout_weight="1"
+          android:layout_height="wrap_content"/>
+   </LinearLayout>
+
+
+</LinearLayout>

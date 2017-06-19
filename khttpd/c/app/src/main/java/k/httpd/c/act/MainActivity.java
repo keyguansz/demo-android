@@ -5,80 +5,91 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.GridView;
-import android.widget.ImageView;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import org.xutils.common.Callback;
 import org.xutils.http.RequestParams;
 
 import java.io.File;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 import k.core.util.kil.KImgLoader;
+import k.core.util.kil.KRawImgLoader;
 import k.httpd.c.act.dshare.dji.R;
 import k.httpd.c.cons.Config;
 import k.httpd.c.cons.IActionSet;
 import k.httpd.c.model.FileInfoModel;
-import k.httpd.c.model.RetModel;
-
-import static k.httpd.c.cons.IActionSet.getFileList;
 
 
-public class Ch12MainActivity extends Activity {
-    private final String TAG = "Ch12MainActivity";
-    protected Gson _gson =  new GsonBuilder()
-            .setDateFormat("yyyy-MM-dd HH:mm:ss")
-            .create();
-    private GridAdapter gridAdapter;
+public class MainActivity extends Activity {
+    private final String TAG = "MainActivity";
+    protected Gson _gson =  new Gson();
+    private GridAdapter mImageAdapter, mVideoAdapter;
+     interface ExtType {
+        String all = "";//""或者null均可
+        String image = "image";
+        String video = "video";
+    }
+    public interface LevelType {
+        String nail = "nail";//缩略图/视频预览图
+        String raw = "raw";//原始文件
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.act_ch12main);
+        setContentView(R.layout.act_main);
         KImgLoader.getIns().init(this);
+        KRawImgLoader.getIns().init(this);
         //初始化xUtils工具 初始化后才能使用
         org.xutils.x.Ext.init(getApplication());
         initView();
     }
 
     private void initView() {
-        GridView gv = (GridView) findViewById(R.id.gv);
-        gridAdapter = new GridAdapter(this);
-        gv.setAdapter(gridAdapter);
-        findViewById(R.id.getFileList).setOnClickListener(new View.OnClickListener() {
+        GridView gv = (GridView) findViewById(R.id.gv_image);
+        mImageAdapter = new GridAdapter(this,ExtType.image);
+        gv.setAdapter(mImageAdapter);
+        mVideoAdapter = new GridAdapter(this, ExtType.video);
+        ((GridView) findViewById(R.id.gv_video)).setAdapter(mVideoAdapter);
+        findViewById(R.id.getFileList_image).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFileList();
-              //  KImgLoader.getIns().setImageBitmap(Config.SERVER_IP+ getFileList,(ImageView) findViewById(R.id.testFileList));
-             /*   new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        KImgLoader.getIns().downToStr(Config.SERVER_IP+ getFileList);
-                    }
-                }).start();*/
-
+                getFileList(ExtType.image);
             }
         });
-        getFileList();
+        findViewById(R.id.getFileList_video).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFileList(ExtType.video);
+            }
+        });
+        getFileList(ExtType.image);
     }
     //获取文件列表
-    public void getFileList(){
-        RequestParams params=new RequestParams(Config.SERVER_IP+ getFileList);
-        params.addParameter("pageId", 1);
+    public void getFileList(final String ext){
+        RequestParams params=new RequestParams(Config.SERVER_IP+ IActionSet.getFileList.DO);
+        params.addParameter(IActionSet.getFileList.pageId, 1);
+        params.addParameter(IActionSet.getFileList.ext, ext);
         showLongToast("getFileList="+params);
         org.xutils.x.http().get(params, new Callback.CommonCallback<String>() {
             @Override
             public void onSuccess(String jsonString) {
-                RetModel  ret =_gson.fromJson(jsonString, RetModel.class);
-            /*    ArrayList<FileInfoModel>  ls =_gson.fromJson(ret.getMsg(), new TypeToken<List<FileInfoModel>>(){}.getType());
-
+                showLongToast("onSuccess,jsonString="+jsonString);
+            /* //   RetModel  ret =_gson.fromJson(jsonString, RetModel.class); */
+                Type listType = new TypeToken<ArrayList<FileInfoModel>>() {}.getType();
+                ArrayList<FileInfoModel>  ls =_gson.fromJson(jsonString, new TypeToken<List<FileInfoModel>>(){}.getType());
                 if (ls!=null && ls.size() > 0)showLongToast(ls.get(0).toString());
-                gridAdapter.updateList(ls);
-*/
+                if (ext.equalsIgnoreCase(ExtType.video)){
+                    mVideoAdapter.updateList(ls);
+                }else {
+                    mImageAdapter.updateList(ls);
+                }
             }
             @Override
             public void onCancelled(Callback.CancelledException arg0) {
@@ -96,7 +107,7 @@ public class Ch12MainActivity extends Activity {
     }
     //获取文件列表
     public void downlaod(){
-        RequestParams params=new RequestParams(Config.SERVER_IP+ IActionSet.Download);
+        RequestParams params=new RequestParams(Config.SERVER_IP+ IActionSet.Download.DO);
         org.xutils.x.http().get(params, new Callback.CommonCallback<File>() {
             @Override
             public void onSuccess(File jsonString) {

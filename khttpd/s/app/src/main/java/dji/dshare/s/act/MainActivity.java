@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
 
 		//testV1();
 		//DshareServer2.main(new String[]{"",""});
-		testV2();
+	//	testV2();
 		init();
 
 	}
@@ -79,10 +79,7 @@ public class MainActivity extends Activity {
         	// 在程序退出时关闭web服务器
             server.stop();
     	}
-    	if (server2 != null){
-			server2.stop();
-		}
-        Log.w("Httpd", "The server stopped.");
+
     }
 
     @Override

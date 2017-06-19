@@ -33,11 +33,10 @@ package k.httpd.s;
  * #L%
  */
 
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Environment;
+import android.media.MediaMetadataRetriever;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -50,13 +49,12 @@ import org.nanohttpd.protocols.http.response.Response;
 import org.nanohttpd.protocols.http.response.Status;
 import org.nanohttpd.util.ServerRunner;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -69,6 +67,7 @@ import static org.nanohttpd.protocols.http.response.Response.newChunkedResponse;
 
 /**
  * An example of subclassing NanoHTTPD to make a custom HTTP server.
+ * https://confluence.djicorp.com/pages/viewpage.action?pageId=10937987
  */
 public class HelloServer extends NanoHTTPD {
     protected Gson _gson = new GsonBuilder()
@@ -120,19 +119,62 @@ public class HelloServer extends NanoHTTPD {
     private Response handleDownload(Map<String, String> param) {
         InputStream inputStream;
         Response response = null;
-        if ( param ==null || param.containsKey("path")) return response;
-        try {
-            inputStream = new FileInputStream(new File(param.get("path")));
-            response = newChunkedResponse(Status.OK, "application/octet-stream", inputStream);//这代表任意的二进制数据传输。
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        String path  = param.get("path");
+        String level = param.get("level");
+        if ( TextUtils.isEmpty(path)) {
+          //  Log.e("TEst","model#" + (i++) + ": " + rtLs.size());
+            return response;
         }
+        String extType = KFileScanner.findExtType(path);
+        if (TextUtils.isEmpty(level)){
+            level = KFileScanner.LevelType.raw;
+        }
+        if (extType.equalsIgnoreCase(KFileScanner.ExtType.image)){//图片格式
+            try {
+                inputStream = new FileInputStream(new File(path));
+                response = newChunkedResponse(Status.OK, "application/octet-stream", inputStream);//这代表任意的二进制数据传输。
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }else if (extType.equalsIgnoreCase(KFileScanner.ExtType.video)){//视频格式
+            if (KFileScanner.LevelType.raw.equalsIgnoreCase(level)){
+                try {
+                    inputStream = new FileInputStream(new File(path));
+                    response = newChunkedResponse(Status.OK, "application/octet-stream", inputStream);//这代表任意的二进制数据传输。
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }else if (KFileScanner.LevelType.nail.equalsIgnoreCase(level)){
+                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                retriever.setDataSource(path);
+                Bitmap bitmap = retriever.getFrameAtTime();
+                try {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                    InputStream isBm = new ByteArrayInputStream(baos.toByteArray());
+                    response = newChunkedResponse(Status.OK, "application/octet-stream", isBm);//这代表任意的二进制数据传输。
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         response.addHeader("Content-Disposition", "attachment; filename=" + "test.java");
         return response;
     }
+ /*   private String bitmapChangeString(Bitmap bitmap){
+        if(bitmap != null){
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+            String str = new String(Base64.encode(baos.toByteArray()));
+            return str;
+        }
+        return null;
+    }*/
 
     private String handleGetFileList(Map<String, String> param) {
         ArrayList<FileInfoModel> rtLs = new ArrayList<>(Config.pageSize);
+        String ext = param.get("ext");
         int pageId = 0;
         //   File f = new File(Config.FileDir);
         //  if (f.listFiles())
@@ -143,14 +185,15 @@ public class HelloServer extends NanoHTTPD {
             model.mtime = SystemClock.currentThreadTimeMillis();
             rtLs.add(model);
         }*/
-        rtLs = mKFileScanner.start();
+        rtLs = mKFileScanner.start(ext);
         rt.setMsg(_gson.toJson(rtLs));
         int i = 0;
         Log.e("TEst","model#" + (i++) + ": " + rtLs.size());
-       /* for (FileInfoModel model : rtLs){
+        for (FileInfoModel model : rtLs){
             Log.e("TEst","model#" + (i++) + ": " + model);
-        }*/
-        return _gson.toJson(rt);
+        }
+       //// TODO: 2017/6/19
+        return _gson.toJson(rtLs);//rt客户端解析失败？
     }
 
 }

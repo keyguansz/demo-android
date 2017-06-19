@@ -28,4 +28,5 @@ dependencies {
     compile files('libs/gson-2.2.4.jar')
     compile files('libs/gson-2.2.4-sources.jar')
     compile files('libs/xUtils-3.2.4.jar')
+    compile files('libs/dji_gson.jar')
 }

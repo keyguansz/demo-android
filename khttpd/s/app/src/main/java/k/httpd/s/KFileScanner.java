@@ -1,13 +1,13 @@
 package k.httpd.s;
 
 import android.os.Environment;
-import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 
 import k.httpd.s.cons.Config;
 import k.httpd.s.model.FileInfoModel;
@@ -21,6 +21,15 @@ import k.httpd.s.model.FileInfoModel;
  */
 
 public final class KFileScanner {
+     interface ExtType {
+        String all = "";//""或者null均可
+        String image = "image";
+        String video = "video";
+    }
+     interface LevelType {
+        String nail = "nail";//缩略图/视频预览图
+        String raw = "raw";//原始文件
+    }
     private static final String TAG = "KFileScanner";
     public static String DATA_ROOT = "/mList/media/0/";
     public static String FLASH_ROOT = Environment.getExternalStorageDirectory().getAbsolutePath() + "/";// 
@@ -32,7 +41,23 @@ public final class KFileScanner {
     public static boolean mIsSupportRecursion = true;//是否支持递归扫描
 
     private static final String[] DIRS = {DATA_ROOT, FLASH_ROOT, SDCARD_ROOT, SDCARD_ROOT1, USB_ROOT, USB_ROOT1};
-    private static final String[] IMAGE_FILE_SUFFIX = {".png", ".jpg"};//其他媒体格式？
+    private static final String[] IMAGE_EXT = {".png", ".jpg"};//不区分大小写，其他媒体格式？比较的时候，更改
+    private static final String[] VIDEO_EXT = {".mp4"};
+    public static String findExtType(final String path){
+        String ext = path.substring(path.lastIndexOf('.'),path.length());
+        for (String str : IMAGE_EXT){
+            if (str.equalsIgnoreCase(ext)){
+                return ExtType.image;
+            }
+        }
+        for (String str : VIDEO_EXT){
+            if (str.equalsIgnoreCase(ext)){
+                return ExtType.video;
+            }
+        }
+        return ExtType.all;
+    }
+
     private static final FileInfoModel.FileComparator mFileComparator = new FileInfoModel.FileComparator();
     private ArrayList<File> mFileList;
 
@@ -46,7 +71,7 @@ public final class KFileScanner {
     public static void test() {
         KFileScanner kFileScanner = new KFileScanner();
         long time = System.currentTimeMillis();
-        ArrayList<FileInfoModel> rt = kFileScanner.start();//211ms,hide后90ms
+        ArrayList<FileInfoModel> rt = kFileScanner.start(null);//211ms,hide后90ms
         long last = (System.currentTimeMillis() - time);
         LOG_I("last time=" + last + ",sec = " + last / 1000+",getSize = "+rt.size());
         int i = 0;
@@ -55,12 +80,12 @@ public final class KFileScanner {
         }
     }
 
-    public ArrayList<FileInfoModel> start() {
-        ArrayList<FileInfoModel> rt = startScanImages(DIRS, mIsSupportRecursion).getLs();
+    public ArrayList<FileInfoModel> start(String ext) {
+        ArrayList<FileInfoModel> rt = startScanImages(DIRS, ext,mIsSupportRecursion).getLs();
         return rt;
     }
 
-    public KFileScanner startScanImages(String scanPaths[], boolean isSupportRecursion) {
+    public KFileScanner startScanImages(String scanPaths[], String ext, boolean isSupportRecursion) {
         reset();
         LOG_I("startScanImages");
         for (String scanPath : scanPaths) {
@@ -70,7 +95,7 @@ public final class KFileScanner {
                 continue;
             }
             LOG_I("scanPath=" + scanPath + " is a valid path, startViaDownload accept");
-            startScanImages(scanRoot.getAbsolutePath(), isSupportRecursion);
+            startScanImages(scanRoot.getAbsolutePath(), ext, isSupportRecursion);
         }
         return this;
     }
@@ -89,12 +114,17 @@ public final class KFileScanner {
             model.len = f.length();
             model.path = f.getPath();
             model.mtime = f.lastModified();
+            Date date = new Date(f.lastModified());
+
+            model.mtimeStr= date.toString();
+
+          //  model.ctime = f.
             rtLs.add(model);
         }
         return rtLs;
     }
 
-    private void startScanImages(String scanPath, boolean isSupportRecursion) {
+    private void startScanImages(String scanPath, String ext, boolean isSupportRecursion) {
         LOG_I("startScanImages :scanPath=" + scanPath + ",isSupportRecursion=" + isSupportRecursion);
         File scanRoot = new File(scanPath);
         if (!scanRoot.exists()) {
@@ -106,7 +136,7 @@ public final class KFileScanner {
             return;
         }
         if (scanRoot.isFile()) {
-            if (acceptFile(scanRoot))
+            if (acceptFile(scanRoot,ext))
                 mFileList.add(scanRoot);
             return;
         }
@@ -115,18 +145,27 @@ public final class KFileScanner {
             File[] fs = scanRoot.listFiles();
             if (fs != null){
                 for (File itFile : fs) {
-                    startScanImages(itFile.getAbsolutePath(), isSupportRecursion);
+                    startScanImages(itFile.getAbsolutePath(), ext, isSupportRecursion);
                 }
             }
         }
     }
 
-    private boolean acceptFile(File file) {
+    private boolean acceptFile(File file, String ext) {
         LOG_I("acceptFile: handlering the file = " + file.getAbsolutePath());
         if (file.isFile()) {
+            if (TextUtils.isEmpty(ext)){
+                return true;
+            }
             String name = file.getName();
             LOG_I("acceptFile: accept prefix！");
-            for (String itStr : IMAGE_FILE_SUFFIX) {//后缀检查
+            String[] suffs = IMAGE_EXT;
+            if (ext.equalsIgnoreCase(ExtType.image)){
+                suffs = IMAGE_EXT;
+            }else if (ext.equalsIgnoreCase(ExtType.video)){
+                suffs = VIDEO_EXT;
+            }
+            for (String itStr :suffs ) {//后缀检查
                 if (name.endsWith(itStr)) {
                     return true;
                 }

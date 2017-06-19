@@ -12,5 +12,9 @@
        android:src="@mipmap/ic_launcher_round"
        android:layout_width="match_parent"
        android:layout_height="match_parent"/>
+   <TextView
+       android:id="@+id/desc"
+       android:layout_width="match_parent"
+       android:layout_height="30dp"/>
 
 </LinearLayout>
