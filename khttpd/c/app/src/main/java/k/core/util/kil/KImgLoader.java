@@ -139,29 +139,27 @@ public final class KImgLoader {
      * @param uri http url
      * @param imageView mBitmap's bind object
      */
-    public void setImageBitmap(final String uri,String level, final ImageView imageView) {
-        setImageBitmap(uri, level, imageView, 0, 0);
+    public void setImageBitmap(final String uri, final ImageView imageView) {
+        setImageBitmap(uri,  imageView, 0, 0);
     }
 
     // FIXME: 2017/6/19 向服务器请求预览图像
     @Deprecated
-    public void setVideoBitmap(final String uri, String level,final ImageView imageView) {
-        setImageBitmap(uri, level, imageView, 0, 0);
+    public void setVideoBitmap(final String uri, final ImageView imageView) {
+        setImageBitmap(uri,  imageView, 0, 0);
     }
-    public void setImageBitmap(final String url, final String level, final ImageView imageView,
+    public void setImageBitmap(final String url,  final ImageView imageView,
                                final int reqWidth, final int reqHeight) {
         imageView.setTag(TAG_KEY_URI, url);//全局唯一的方法。
-        final Bitmap bitmap = loadFromMem(url,level);
+        final Bitmap bitmap = loadFromMem(url);
         if (bitmap != null ) {
-            if (level.equalsIgnoreCase(MainActivity.LevelType.nail)){
-                imageView.setImageBitmap(bitmap);
-            }
+            imageView.setImageBitmap(bitmap);
             return;
         }
         Runnable loadTask = new Runnable() {
             @Override
             public void run() {
-                Bitmap bitmap = load(url, level, reqWidth, reqHeight);
+                Bitmap bitmap = load(url,  reqWidth, reqHeight);
                 if (bitmap != null) {
                     LoaderResult result = new LoaderResult(imageView, url, bitmap);
                    // mMainHandler.sendMessage(mMainHandler.obtainMessage(0, result));
@@ -195,19 +193,19 @@ public final class KImgLoader {
         return statFs.getBlockSize() * statFs.getAvailableBlocks();
     }
 
-    private Bitmap load(String uri, String level,int reqWidth, int reqHeight) {
-        Bitmap bitmap = loadFromMem(uri,level);
+    private Bitmap load(String uri,  int reqWidth, int reqHeight) {
+        Bitmap bitmap = loadFromMem(uri);
         if (bitmap != null) {
             LOG_D("loadBitmapFromMemCache,url:" + uri);
             return bitmap;
         }
         try {
-            bitmap = loadFromDisk(uri, level,reqWidth, reqHeight);
+            bitmap = loadFromDisk(uri, reqWidth, reqHeight);
             if (bitmap != null) {
                 LOG_D("loadBitmapFromDisk,url:" + uri);
                 return bitmap;
             }
-            bitmap = loadFromNet(uri, level, reqWidth, reqHeight);
+            bitmap = loadFromNet(uri,  reqWidth, reqHeight);
             LOG_D("loadBitmapFromHttp,url:" + uri);
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -219,12 +217,12 @@ public final class KImgLoader {
         return bitmap;
     }
 
-    private Bitmap loadFromMem(String url,final String level) {
-        final String key = hashKey(url, level);
+    private Bitmap loadFromMem(String url) {
+        final String key = hashKey(url);
         return mMemoryCache.get(key);
     }
 
-    private Bitmap loadFromDisk(String url, final String level,int reqWidth, int reqHeight) throws IOException {
+    private Bitmap loadFromDisk(String url, int reqWidth, int reqHeight) throws IOException {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             Log.w(TAG, "load mBitmap from UI Thread, it's not recommended!");
         }
@@ -233,7 +231,7 @@ public final class KImgLoader {
         }
 
         Bitmap bitmap = null;
-        String key = hashKey(url, level);
+        String key = hashKey(url);
         DiskLruCache.Snapshot snapshot = mDiskLruCache.get(key);
         if (snapshot != null) {
             FileInputStream fileInputStream = (FileInputStream) snapshot.getInputStream(DISK_CACHE_INDEX);
@@ -247,7 +245,7 @@ public final class KImgLoader {
     }
 
     //http
-    private Bitmap loadFromNet(String url, final String level,int reqWidth, int reqHeight) throws IOException {
+    private Bitmap loadFromNet(String url, int reqWidth, int reqHeight) throws IOException {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             throw new RuntimeException("can not visit network from UI Thread.");
         }
@@ -255,7 +253,7 @@ public final class KImgLoader {
             LOG("mDiskLruCache == null");
             return null;
         }
-        String key = hashKey(url,level);
+        String key = hashKey(url);
         DiskLruCache.Editor editor = mDiskLruCache.edit(key);
         if (editor != null) {
             OutputStream outputStream = editor.newOutputStream(DISK_CACHE_INDEX);
@@ -266,7 +264,7 @@ public final class KImgLoader {
             }
             mDiskLruCache.flush();
         }
-        return loadFromDisk(url, level, reqWidth, reqHeight);
+        return loadFromDisk(url,  reqWidth, reqHeight);
     }
 
     private Bitmap loadFromNet(String urlStr) {
@@ -302,7 +300,7 @@ public final class KImgLoader {
         try {
             HashMap<String,String> parmMap = new HashMap<>(4);
             parmMap.put(IActionSet.Download.path, path);
-            parmMap.put(level, level);
+            parmMap.put(IActionSet.Download.level, MainActivity.LevelType.nail);
             final URL url = new URL(genParam(Config.SERVER_IP + IActionSet.Download.DO, parmMap));
             httpURLConnection = (HttpURLConnection) url.openConnection();
             in = new BufferedInputStream(httpURLConnection.getInputStream(), IO_BUFFER_SIZE);
@@ -367,7 +365,7 @@ public final class KImgLoader {
         try {
             HashMap<String,String> parmMap = new HashMap<>(4);
             parmMap.put(IActionSet.Download.path, path);
-            parmMap.put(level, level);
+            parmMap.put( IActionSet.Download.level,MainActivity.LevelType.nail);
             final URL url = new URL(genParam(Config.SERVER_IP + IActionSet.Download.DO, parmMap));
             urlConnection = (HttpURLConnection) url.openConnection();
             in = new BufferedInputStream(urlConnection.getInputStream(), IO_BUFFER_SIZE);
@@ -442,7 +440,7 @@ public final class KImgLoader {
  *@desc  hash文件名作，后缀不变
  *@author : key.guan @ 2017/6/19 17:26
  */
-    private String hashKey(String url,String level) {
+    private String hashKey(String url) {
         int pos = url.lastIndexOf('.');
         String ext = url.substring(pos+1);
         url = url.substring(0, pos);
@@ -454,7 +452,7 @@ public final class KImgLoader {
         } catch (NoSuchAlgorithmException e) {
             cacheKey = String.valueOf(url.hashCode());
         }
-        return cacheKey+"_"+level+"."+ext;
+        return cacheKey+"_nail."+ext;
     }
 
     private String bytesToHexString(byte[] bytes) {

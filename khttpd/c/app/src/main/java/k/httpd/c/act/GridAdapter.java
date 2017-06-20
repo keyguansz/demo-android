@@ -2,6 +2,7 @@ package k.httpd.c.act;
 
 import android.content.Context;
 import android.net.wifi.WifiManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -75,7 +76,7 @@ public class GridAdapter extends BaseAdapter {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        KImgLoader.getIns().setImageBitmap(mQSList.get(position).path, MainActivity.LevelType.nail, holder.mImageView);
+        KImgLoader.getIns().setImageBitmap(mQSList.get(position).path, holder.mImageView);
       /*  if (MainActivity.ExtType.image.equalsIgnoreCase(mExt)) {
 
         } else {
@@ -103,7 +104,8 @@ public class GridAdapter extends BaseAdapter {
         public void onClick(View v) {
             //mPath?
             Toast.makeText(v.getContext(), "down " + mQSList.get(mPos), Toast.LENGTH_LONG);
-            KRawImgLoader.getIns().setTextView( mQSList.get(mPos), (TextView)(v) );
+            Log.e("raw_down", "down " + mQSList.get(mPos));
+            KRawImgLoader.getIns().setTextView( mQSList.get(mPos).path, (TextView)(v) );
 
         }
     }

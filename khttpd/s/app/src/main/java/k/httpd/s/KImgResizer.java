@@ -1,4 +1,4 @@
-package k.core.util.kil;
+package k.httpd.s;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -6,8 +6,8 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import java.io.FileDescriptor;
+import java.util.Locale;
 
-import k.core.util.KLogUtil;
 
 import static android.content.ContentValues.TAG;
 
@@ -47,6 +47,9 @@ public class KImgResizer {
         options.inSampleSize = getSampleSize(options, reqW, reqH);
         options.inJustDecodeBounds = false;
         return BitmapFactory.decodeFile(path, options);
+    }
+    public static Bitmap decode(String path) {
+        return BitmapFactory.decodeFile(path);
     }
     private static int getSampleSize(BitmapFactory.Options options,int reqW, int reqH){
         if (reqW == 0 || reqH == 0) {
@@ -126,6 +129,6 @@ public class KImgResizer {
         return inSampleSize;
     }
     private static void LOG_D(String log){
-        KLogUtil.E("KImgResizer",log);
+        Log.e("KImgResizer",log);
     }
 }

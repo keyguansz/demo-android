@@ -35,6 +35,7 @@ package k.httpd.s;
 
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
+import android.media.ThumbnailUtils;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -63,7 +64,9 @@ import k.httpd.s.cons.Config;
 import k.httpd.s.model.FileInfoModel;
 import k.httpd.s.model.RetModel;
 
+import static android.R.attr.bitmap;
 import static org.nanohttpd.protocols.http.response.Response.newChunkedResponse;
+import static org.nanohttpd.protocols.http.response.Response.newFixedLengthResponse;
 
 /**
  * An example of subclassing NanoHTTPD to make a custom HTTP server.
@@ -106,10 +109,7 @@ public class HelloServer extends NanoHTTPD {
         }
         String action = uri.substring(1);
         if (action.equals(IActionSet.getFileList)) {
-            String rt = handleGetFileList(param);
-          //  Response response = new Response(Status.OK,"application/json",rt);
-           return  Response.newFixedLengthResponse(Status.OK,"application/json",rt);
-          //  return Response.newFixedLengthResponse(handleGetFileList(param));
+            return handleGetFileList(param);
         } else if (action.equals(IActionSet.Download)) {
             return handleDownload(param);
         }
@@ -117,48 +117,44 @@ public class HelloServer extends NanoHTTPD {
     }
 
     private Response handleDownload(Map<String, String> param) {
-        InputStream inputStream;
+        InputStream inputStream = null;
         Response response = null;
-        String path  = param.get("path");
+        String path = param.get("path");
         String level = param.get("level");
-        if ( TextUtils.isEmpty(path)) {
-          //  Log.e("TEst","model#" + (i++) + ": " + rtLs.size());
-            return response;
-        }
         String extType = KFileScanner.findExtType(path);
-        if (TextUtils.isEmpty(level)){
+        if (TextUtils.isEmpty(level)) {
             level = KFileScanner.LevelType.raw;
         }
-        if (extType.equalsIgnoreCase(KFileScanner.ExtType.image)){//图片格式
+
+        File file = new File(path);
+        long contentLen = file.length();
+        if (KFileScanner.LevelType.raw.equalsIgnoreCase(level)) {//原始图
             try {
-                inputStream = new FileInputStream(new File(path));
-                response = newChunkedResponse(Status.OK, "application/octet-stream", inputStream);//这代表任意的二进制数据传输。
+                inputStream = new FileInputStream(file);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
-            }
-        }else if (extType.equalsIgnoreCase(KFileScanner.ExtType.video)){//视频格式
-            if (KFileScanner.LevelType.raw.equalsIgnoreCase(level)){
-                try {
-                    inputStream = new FileInputStream(new File(path));
-                    response = newChunkedResponse(Status.OK, "application/octet-stream", inputStream);//这代表任意的二进制数据传输。
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }else if (KFileScanner.LevelType.nail.equalsIgnoreCase(level)){
+            }//// FIXME: 2017/6/20 怎么传递文件长度呢？
+            response = newChunkedResponse(Status.OK, "application/octet-stream", inputStream);
+        } else if (KFileScanner.LevelType.nail.equalsIgnoreCase(level)) {//缩略图
+            Bitmap bitmap = null;
+            if (extType.equalsIgnoreCase(KFileScanner.ExtType.image)) {//图片缩略图
+                bitmap = ThumbnailUtils.extractThumbnail(KImgResizer.decode(path), 120, 120);
+            } else if (extType.equalsIgnoreCase(KFileScanner.ExtType.video)) {//视频缩略图
                 MediaMetadataRetriever retriever = new MediaMetadataRetriever();
                 retriever.setDataSource(path);
-                Bitmap bitmap = retriever.getFrameAtTime();
-                try {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-                    InputStream isBm = new ByteArrayInputStream(baos.toByteArray());
-                    response = newChunkedResponse(Status.OK, "application/octet-stream", isBm);//这代表任意的二进制数据传输。
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                bitmap = retriever.getFrameAtTime();
             }
+            try {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                inputStream = new ByteArrayInputStream(baos.toByteArray());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            response = newChunkedResponse(Status.OK, "application/octet-stream", inputStream);
         }
-
+        //这代表任意的二进制数据传输。
+       
         response.addHeader("Content-Disposition", "attachment; filename=" + "test.java");
         return response;
     }
@@ -172,7 +168,7 @@ public class HelloServer extends NanoHTTPD {
         return null;
     }*/
 
-    private String handleGetFileList(Map<String, String> param) {
+    private Response handleGetFileList(Map<String, String> param) {
         ArrayList<FileInfoModel> rtLs = new ArrayList<>(Config.pageSize);
         String ext = param.get("ext");
         int pageId = 0;
@@ -188,12 +184,13 @@ public class HelloServer extends NanoHTTPD {
         rtLs = mKFileScanner.start(ext);
         rt.setMsg(_gson.toJson(rtLs));
         int i = 0;
-        Log.e("TEst","model#" + (i++) + ": " + rtLs.size());
-        for (FileInfoModel model : rtLs){
-            Log.e("TEst","model#" + (i++) + ": " + model);
+        Log.e("TEst", "model#" + (i++) + ": " + rtLs.size());
+        for (FileInfoModel model : rtLs) {
+            Log.e("TEst", "model#" + (i++) + ": " + model);
         }
-       //// TODO: 2017/6/19
-        return _gson.toJson(rtLs);//rt客户端解析失败？
+        //// TODO: 2017/6/19
+        ;//rt客户端解析失败？
+        return  newFixedLengthResponse(Status.OK, "application/json", _gson.toJson(rtLs));
     }
 
 }
