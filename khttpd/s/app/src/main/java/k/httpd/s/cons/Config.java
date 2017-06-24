@@ -9,6 +9,7 @@ public final class Config {
 	public static String video;
 	public static String image;
 	public final static long max_size_image=10*1024*1024;
+	public final static long Day =1000*60*60*24;
 	//局域网
 	public static final int port = 8081;
 	private static boolean isAp = true;

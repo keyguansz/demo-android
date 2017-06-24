@@ -38,11 +38,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import k.core.util.DJITextUtil;
 import k.core.util.KLogUtil;
 import k.core.util.KUtils;
-import k.httpd.c.act.MainActivity;
 import k.httpd.c.cons.Config;
-import k.httpd.c.cons.IActionSet;
+import k.httpd.c.cons.ICsProtocolSet;
 
-import static k.httpd.c.cons.IActionSet.Download.level;
+import static k.httpd.c.cons.ICsProtocolSet.Download.level;
 
 
 /**
@@ -98,8 +97,6 @@ public final class KImgLoader {
     private static final int IO_BUFFER_SIZE = 8 * 1024;
     private static final int DISK_CACHE_INDEX = 0;
     private boolean mIsDiskLruCacheCreated = false;
-
-
 
     private static KImgLoader ins = new KImgLoader();
 
@@ -237,7 +234,7 @@ public final class KImgLoader {
             FileInputStream fileInputStream = (FileInputStream) snapshot.getInputStream(DISK_CACHE_INDEX);
             FileDescriptor fileDescriptor = fileInputStream.getFD();
             bitmap = mImageResizer.decode(fileDescriptor, reqWidth, reqHeight);
-            if (bitmap != null && level.equalsIgnoreCase(MainActivity.LevelType.nail)) {
+            if (bitmap != null && level.equalsIgnoreCase(ICsProtocolSet.LevelType.nail)) {
                 putToMeoryCache(key, bitmap);
             }
         }
@@ -299,9 +296,9 @@ public final class KImgLoader {
         BufferedInputStream in = null;
         try {
             HashMap<String,String> parmMap = new HashMap<>(4);
-            parmMap.put(IActionSet.Download.path, path);
-            parmMap.put(IActionSet.Download.level, MainActivity.LevelType.nail);
-            final URL url = new URL(genParam(Config.SERVER_IP + IActionSet.Download.DO, parmMap));
+            parmMap.put(ICsProtocolSet.Download.path, path);
+            parmMap.put(ICsProtocolSet.Download.level, ICsProtocolSet.LevelType.nail);
+            final URL url = new URL(genParam(Config.SERVER_IP + ICsProtocolSet.Download.DO, parmMap));
             httpURLConnection = (HttpURLConnection) url.openConnection();
             in = new BufferedInputStream(httpURLConnection.getInputStream(), IO_BUFFER_SIZE);
             bitmap = BitmapFactory.decodeStream(in);
@@ -364,9 +361,9 @@ public final class KImgLoader {
         BufferedOutputStream out = null;
         try {
             HashMap<String,String> parmMap = new HashMap<>(4);
-            parmMap.put(IActionSet.Download.path, path);
-            parmMap.put( IActionSet.Download.level,MainActivity.LevelType.nail);
-            final URL url = new URL(genParam(Config.SERVER_IP + IActionSet.Download.DO, parmMap));
+            parmMap.put(ICsProtocolSet.Download.path, path);
+            parmMap.put( ICsProtocolSet.Download.level, ICsProtocolSet.LevelType.nail);
+            final URL url = new URL(genParam(Config.SERVER_IP + ICsProtocolSet.Download.DO, parmMap));
             urlConnection = (HttpURLConnection) url.openConnection();
             in = new BufferedInputStream(urlConnection.getInputStream(), IO_BUFFER_SIZE);
             out = new BufferedOutputStream(outputStream, IO_BUFFER_SIZE);

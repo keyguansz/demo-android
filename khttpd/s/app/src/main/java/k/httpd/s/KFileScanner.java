@@ -11,6 +11,7 @@ import java.util.Date;
 
 import k.httpd.s.cons.Config;
 import k.httpd.s.model.FileInfoModel;
+import k.httpd.s.model.FileInfoModels;
 
 /**
  * @author :key.guan
@@ -21,15 +22,6 @@ import k.httpd.s.model.FileInfoModel;
  */
 
 public final class KFileScanner {
-     interface ExtType {
-        String all = "";//""或者null均可
-        String image = "image";
-        String video = "video";
-    }
-     interface LevelType {
-        String nail = "nail";//缩略图/视频预览图
-        String raw = "raw";//原始文件
-    }
     private static final String TAG = "KFileScanner";
     public static String DATA_ROOT = "/mList/media/0/";
     public static String FLASH_ROOT = Environment.getExternalStorageDirectory().getAbsolutePath() + "/";// 
@@ -43,19 +35,20 @@ public final class KFileScanner {
     private static final String[] DIRS = {DATA_ROOT, FLASH_ROOT, SDCARD_ROOT, SDCARD_ROOT1, USB_ROOT, USB_ROOT1};
     private static final String[] IMAGE_EXT = {".png", ".jpg"};//不区分大小写，其他媒体格式？比较的时候，更改
     private static final String[] VIDEO_EXT = {".mp4"};
+    private static final String[] BOTH_EXT = {".png", ".jpg", ".mp4"};
     public static String findExtType(final String path){
         String ext = path.substring(path.lastIndexOf('.'),path.length());
         for (String str : IMAGE_EXT){
             if (str.equalsIgnoreCase(ext)){
-                return ExtType.image;
+                return ICsProtocolSet.ExtType.image;
             }
         }
         for (String str : VIDEO_EXT){
             if (str.equalsIgnoreCase(ext)){
-                return ExtType.video;
+                return ICsProtocolSet.ExtType.video;
             }
         }
-        return ExtType.all;
+        return ICsProtocolSet.ExtType.all;
     }
 
     private static final FileInfoModel.FileComparator mFileComparator = new FileInfoModel.FileComparator();
@@ -82,6 +75,28 @@ public final class KFileScanner {
 
     public ArrayList<FileInfoModel> start(String ext) {
         ArrayList<FileInfoModel> rt = startScanImages(DIRS, ext,mIsSupportRecursion).getLs();
+        return rt;
+    }
+    public ArrayList<FileInfoModels> start(String ext, String order) {
+        ArrayList<FileInfoModel> lst = startScanImages(DIRS, ext,mIsSupportRecursion).getLs();
+        ArrayList<FileInfoModels> rt = null;
+        if (lst.size() >= 1 ){
+            rt = new ArrayList<>();
+            long titleMtime = -1;
+            long itMtime;
+            FileInfoModels fileInfoModels = null;
+            for (FileInfoModel it : lst){
+                itMtime = it.mtime / Config.Day;
+                if ( titleMtime != itMtime){
+                    titleMtime = itMtime;
+                    fileInfoModels = new FileInfoModels();
+                    fileInfoModels.mtime = it.mtime;
+                    fileInfoModels.datas = new ArrayList<>();
+                    rt.add(fileInfoModels);
+                }
+                fileInfoModels.datas.add(it);
+            }
+        }
         return rt;
     }
 
@@ -154,15 +169,15 @@ public final class KFileScanner {
     private boolean acceptFile(File file, String ext) {
         LOG_I("acceptFile: handlering the file = " + file.getAbsolutePath());
         if (file.isFile()) {
-            if (TextUtils.isEmpty(ext)){
+            if (TextUtils.isEmpty(ext) || ext.equalsIgnoreCase(ICsProtocolSet.ExtType.all)){
                 return true;
             }
             String name = file.getName();
             LOG_I("acceptFile: accept prefix！");
-            String[] suffs = IMAGE_EXT;
-            if (ext.equalsIgnoreCase(ExtType.image)){
+            String[] suffs = BOTH_EXT;
+            if (ext.equalsIgnoreCase(ICsProtocolSet.ExtType.image)){
                 suffs = IMAGE_EXT;
-            }else if (ext.equalsIgnoreCase(ExtType.video)){
+            }else if (ext.equalsIgnoreCase(ICsProtocolSet.ExtType.video)){
                 suffs = VIDEO_EXT;
             }
             for (String itStr :suffs ) {//后缀检查

@@ -33,11 +33,7 @@ import k.core.util.KLogUtil;
 import k.core.util.KUtils;
 import k.httpd.c.act.dshare.dji.R;
 import k.httpd.c.cons.Config;
-import k.httpd.c.cons.IActionSet;
-
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
-import static android.os.Build.VERSION_CODES.M;
-import static k.httpd.c.cons.IActionSet.Download.path;
+import k.httpd.c.cons.ICsProtocolSet;
 
 
 /**
@@ -248,9 +244,9 @@ public final class KRawImgLoader {
         BufferedOutputStream out = null;
         try {
             HashMap<String,String> parmMap = new HashMap<>(4);
-            parmMap.put(IActionSet.Download.path, path);
-            parmMap.put(IActionSet.Download.level, "raw");
-            final URL url = new URL(genParam(Config.SERVER_IP + IActionSet.Download.DO, parmMap));
+            parmMap.put(ICsProtocolSet.Download.path, path);
+            parmMap.put(ICsProtocolSet.Download.level, "raw");
+            final URL url = new URL(genParam(Config.SERVER_IP + ICsProtocolSet.Download.DO, parmMap));
             urlConnection = (HttpURLConnection) url.openConnection();
             in = new BufferedInputStream(urlConnection.getInputStream(), IO_BUFFER_SIZE);
             out = new BufferedOutputStream(outputStream, IO_BUFFER_SIZE);
