@@ -13,6 +13,7 @@ public final class FileInfoModel {
     public long mtime;//修改时间
     public String mtimeStr;//修改时间
     public long ctime;//创建时间
+    public int state;
     @Override
     public String toString() {
         StringBuilder sb= new StringBuilder(30);

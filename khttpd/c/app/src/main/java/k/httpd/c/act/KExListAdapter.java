@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.GridView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,11 +20,13 @@ import org.xutils.http.RequestParams;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
+import k.core.util.KTextUtil;
+import k.core.util.kil.KRawImgLoader;
 import k.httpd.c.act.dshare.dji.R;
 import k.httpd.c.cons.Config;
 import k.httpd.c.cons.ICsProtocolSet;
+import k.httpd.c.model.FileInfoModel;
 import k.httpd.c.model.FileInfoModels;
 
 /**
@@ -41,19 +42,21 @@ public class KExListAdapter extends BaseExpandableListAdapter {
     final ArrayList<FileInfoModels> mData = new ArrayList<>();
     private String mExt;
     private Gson _gson = new Gson();
+    private Context mCtx;
 
     public KExListAdapter(Context context, String ext) {
         mExt = ext;
         mInflater = LayoutInflater.from(context);
+        mCtx = context;
     }
     public void updateView() {
         //仅仅为空的时候才向服务器请求
-        if (mData == null || mData.size() == 0){
+      //  if (mData == null || mData.size() == 0){
             getFileList(mExt);
-        }
+     //   }
     }
     @Override
-    public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+    public View getGroupView(int gId, boolean isExpanded, View convertView, ViewGroup parent) {
         GViewHolder viewHolder;
         if (convertView == null) {
             viewHolder = new GViewHolder();
@@ -63,12 +66,12 @@ public class KExListAdapter extends BaseExpandableListAdapter {
         } else {
             viewHolder = (GViewHolder) convertView.getTag();
         }
-        viewHolder.tv.setText(getGroup(groupPosition).toString());
+        viewHolder.tv.setText(getGroup(gId));
         return convertView;
     }
 
     @Override
-    public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup
+    public View getChildView(final int gId, int childPosition, boolean isLastChild, View convertView, ViewGroup
             parent) {
         CViewHolder viewHolder;
         if (convertView == null) {
@@ -79,10 +82,44 @@ public class KExListAdapter extends BaseExpandableListAdapter {
         } else {
             viewHolder = (CViewHolder) convertView.getTag();
         }
-        GridAdapter mImageAdapter = new GridAdapter(parent.getContext(), mExt);
+        GridAdapter mImageAdapter = new GridAdapter(mCtx, mExt);
+        // KWillDo: 2017/6/25 性能？
+        mImageAdapter.updateList(mData.get(gId).datas);
         viewHolder.gv.setAdapter(mImageAdapter);
+        viewHolder.gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if ( mData.get(gId).datas.get(position).state == ICsProtocolSet.StateType.init){
+                    mData.get(gId).datas.get(position).state = ICsProtocolSet.StateType.selected;
+                    ((KCheckImageView)view).setChecked(true);
+                    return;
+                }
+                if ( mData.get(gId).datas.get(position).state == ICsProtocolSet.StateType.selected){
+                    mData.get(gId).datas.get(position).state = ICsProtocolSet.StateType.init;
+                    ((KCheckImageView)view).setChecked(false);
+                    return;
+                }
+            }
+        });
         return convertView;
     }
+    private class MyOnClickListener implements View.OnClickListener {
+        final int mPos;
+        final String mPath;
+
+        public MyOnClickListener(int pos,String path) {
+            mPos = pos;
+            mPath = path;
+        }
+
+        @Override
+        public void onClick(View v) {
+            //mPath?
+          //  Toast.makeText(v.getContext(), "down " + mQSList.get(mPos), Toast.LENGTH_LONG);
+           // Log.e("raw_down", "down " + mQSList.get(mPos));
+         //   KRawImgLoader.getIns().setTextView( mQSList.get(mPos).path, (TextView)(v) );
+        }
+    };
 
     //获取文件列表
     // KWillDo: 2017/6/25 主线程卡死？
@@ -99,7 +136,7 @@ public class KExListAdapter extends BaseExpandableListAdapter {
                 }.getType();
                 ArrayList<FileInfoModels> ls = _gson.fromJson(jsonString, listType);
                 if (ls != null && ls.size() > 0)
-                    showLongToast(ls.get(0).toString());
+                    //showLongToast(ls.get(0).toString());
                 updateData(ls);
             }
 
@@ -146,16 +183,17 @@ public class KExListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int gId) {
-        return mData.get(gId).datas.size();
+        return 1 /*mData.get(gId).datas.size()*/;//
     }
 
     @Override
-    public Object getGroup(int gId) {
-        return mData.get(gId);
+    public String getGroup(int gId) {
+        long mtime = mData.get(gId).mtime;
+        return KTextUtil.formatADate(mtime);
     }
 
     @Override
-    public Object getChild(int gId, int cId) {
+    public FileInfoModel getChild(int gId, int cId) {
         return mData.get(gId).datas.get(cId);
     }
 

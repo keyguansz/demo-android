@@ -1,5 +1,7 @@
 package k.httpd.s;
 
+import java.util.zip.Inflater;
+
 /**
  * Created by key on 2017/6/17.
  */
@@ -30,5 +32,11 @@ public interface ICsProtocolSet {
         String no = "no";//不分组
         String date = "date";//时间排序
         String size = "size";//原始文件
+    }
+    interface StateType{
+        int init = 0;
+        int downing = 1;
+        int fail = 2;
+        int suc = 3;
     }
 }

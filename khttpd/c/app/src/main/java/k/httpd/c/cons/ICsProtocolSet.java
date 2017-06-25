@@ -30,4 +30,11 @@ public interface ICsProtocolSet {
         String date = "date";//时间排序
         String size = "size";//原始文件
     }
+    interface StateType{
+        int init = 0;
+        int selected = 1;
+        int downing = 2;
+        int fail = 3;
+        int suc = 4;
+    }
 }

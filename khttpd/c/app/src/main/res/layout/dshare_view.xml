@@ -27,6 +27,12 @@
             android:button="@null"
             android:text="photo"
             />
+        <TextView
+            android:id="@+id/down_tv"
+            android:background="@android:color/holo_red_light"
+            android:text="down!!"
+            android:layout_width="40dp"
+            android:layout_height="40dp"/>
     </RadioGroup>
 
     <FrameLayout

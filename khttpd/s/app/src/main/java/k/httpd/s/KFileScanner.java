@@ -92,8 +92,10 @@ public final class KFileScanner {
                     fileInfoModels = new FileInfoModels();
                     fileInfoModels.mtime = it.mtime;
                     fileInfoModels.datas = new ArrayList<>();
+                    fileInfoModels.mtimeStr = it.mtimeStr;
                     rt.add(fileInfoModels);
                 }
+                fileInfoModels.s
                 fileInfoModels.datas.add(it);
             }
         }

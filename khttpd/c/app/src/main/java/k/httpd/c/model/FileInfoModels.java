@@ -1,5 +1,6 @@
 package k.httpd.c.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -7,13 +8,12 @@ import java.util.List;
  */
 
 public final class FileInfoModels {
-    public long mtime;//修改时间，单位为天，t,y
+    public long mtime;//修改时间，单位ms
     public String mtimeStr;//title
-    public List<FileInfoModel> datas;
-
+    public ArrayList<FileInfoModel> datas;
     @Override
     public String toString() {
-        int size = datas != null?0:datas.size();
+        int size = datas == null ? 0 : datas.size();
         StringBuilder sb= new StringBuilder(30);
         sb.append(",\"mtime\":\"");
         sb.append(mtime);

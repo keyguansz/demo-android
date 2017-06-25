@@ -35,7 +35,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import k.core.util.DJITextUtil;
+import k.core.util.KTextUtil;
 import k.core.util.KLogUtil;
 import k.core.util.KUtils;
 import k.httpd.c.cons.Config;
@@ -419,7 +419,7 @@ public final class KImgLoader {
             }
 
          //   log.d("parse response "," listHtml size = " + conn.getContentLength()+ " hasread = " + htmlBuffer.length);
-            htmlStr = DJITextUtil.getString(htmlBuffer, "UTF-8");
+           // htmlStr = KTextUtil.getString(htmlBuffer, "UTF-8");
           //  log.d(htmlStr);
           //  inStream.close();
             return htmlStr;

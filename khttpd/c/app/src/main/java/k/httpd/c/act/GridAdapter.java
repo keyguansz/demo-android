@@ -1,13 +1,11 @@
 package k.httpd.c.act;
 
 import android.content.Context;
-import android.net.wifi.WifiManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,6 +14,7 @@ import java.util.ArrayList;
 import k.core.util.kil.KImgLoader;
 import k.core.util.kil.KRawImgLoader;
 import k.httpd.c.act.dshare.dji.R;
+import k.httpd.c.cons.ICsProtocolSet;
 import k.httpd.c.model.FileInfoModel;
 
 /**
@@ -64,19 +63,22 @@ public class GridAdapter extends BaseAdapter {
         if (convertView == null) {
             holder = new ViewHolder();
             convertView = LayoutInflater.from(mContext).inflate(R.layout.act_ch12_item, null);
-            holder.mImageView = (ImageView) convertView.findViewById(R.id.image);
-            holder.mDesc = (TextView) convertView.findViewById(R.id.desc);
-            holder.mDesc.setOnClickListener(new MyOnClickListener(position,mQSList.get(position).path));
+            holder.mImageView = (KCheckImageView) convertView.findViewById(R.id.image);
+          //  holder.mDesc = (TextView) convertView.findViewById(R.id.desc);
+           // holder.mImageView.setOnClickListener(new MyOnClickListener(position,mQSList.get(position).path));
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        KImgLoader.getIns().setImageBitmap(mQSList.get(position).path, holder.mImageView);
+        if (mQSList.get(position).state == ICsProtocolSet.StateType.selected){
+            holder.mImageView.setChecked(true);
+        }
+        KImgLoader.getIns().setImageBitmap(mQSList.get(position).path, holder.mImageView.getBgView());
         return convertView;
     }
 
     private static class ViewHolder {
-        ImageView mImageView;
+        KCheckImageView mImageView;
         TextView mDesc;
     }
 

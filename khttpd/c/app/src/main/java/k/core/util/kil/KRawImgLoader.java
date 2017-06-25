@@ -22,6 +22,7 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -44,6 +45,9 @@ import k.httpd.c.cons.ICsProtocolSet;
  * @qa:DISK_CACHE_INDEX作用是啥？ Snapshot为啥不是直接文件的方式？我要拷贝文件出来怎么办？？？
  */
 public final class KRawImgLoader {
+    public void start(HashSet<String> mSelected) {
+    }
+
     public interface CallBack{
         void onLoading(int progress);
     }
