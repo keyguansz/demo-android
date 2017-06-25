@@ -77,7 +77,7 @@ public final class KRawImgLoader {
                 if (result.mUri.equals(oldUrl)) {
                     textView.setText("progess="+msg.arg1+",arg2="+msg.arg2);
                 } else {
-                    LOG_W("set image mBitmap,but url has changed, ignored!");
+                    LOG_W("set photo mBitmap,but url has changed, ignored!");
                 }
             }else if (msg.what == MSG_FINISH){
                 LoaderResult result = (LoaderResult)msg.obj;
@@ -86,7 +86,7 @@ public final class KRawImgLoader {
                 if (result.mUri.equals(oldUrl)) {
                     textView.setText("MSG_FINISH");
                 } else {
-                    LOG_W("set image mBitmap,but url has changed, ignored!");
+                    LOG_W("set photo mBitmap,but url has changed, ignored!");
                 }
             }
         };

@@ -26,18 +26,13 @@ import k.httpd.c.model.FileInfoModel;
 
 public class GridAdapter extends BaseAdapter {
     public static final String TAG = "GridAdapter";
-
-
     Context mContext;
     String mExt;
 
     final ArrayList<FileInfoModel> mQSList = new ArrayList<>();
-    private final WifiManager mWifiManager;
-
     public GridAdapter(Context context, String ext) {
         mContext = context;
         mExt = ext;
-        mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     }
 
     @Override
@@ -77,12 +72,6 @@ public class GridAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
         KImgLoader.getIns().setImageBitmap(mQSList.get(position).path, holder.mImageView);
-      /*  if (MainActivity.ExtType.image.equalsIgnoreCase(mExt)) {
-
-        } else {
-            KImgLoader.getIns().setVideoBitmap(mQSList.get(position).path, holder.mImageView);
-        }*/
-
         return convertView;
     }
 
@@ -106,9 +95,6 @@ public class GridAdapter extends BaseAdapter {
             Toast.makeText(v.getContext(), "down " + mQSList.get(mPos), Toast.LENGTH_LONG);
             Log.e("raw_down", "down " + mQSList.get(mPos));
             KRawImgLoader.getIns().setTextView( mQSList.get(mPos).path, (TextView)(v) );
-
         }
-    }
-
-    ;
+    };
 }

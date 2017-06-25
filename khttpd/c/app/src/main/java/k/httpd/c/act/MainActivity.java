@@ -35,17 +35,18 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //初始化xUtils工具 初始化后才能使用,自定义类的时候，这个需要早点初始化！
+        org.xutils.x.Ext.init(getApplication());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.act_main);
         KImgLoader.getIns().init(this);
         KRawImgLoader.getIns().init(this);
-        //初始化xUtils工具 初始化后才能使用
-        org.xutils.x.Ext.init(getApplication());
+
         initView();
     }
 
     private void initView() {
-        GridView gv = (GridView) findViewById(R.id.gv_image);
+      /*  GridView gv = (GridView) findViewById(R.id.gv_image);
         mImageAdapter = new GridAdapter(this, ICsProtocolSet.ExtType.image);
         gv.setAdapter(mImageAdapter);
         mVideoAdapter = new GridAdapter(this, ICsProtocolSet.ExtType.video);
@@ -62,7 +63,7 @@ public class MainActivity extends Activity {
                 getFileList(ICsProtocolSet.ExtType.video);
             }
         });
-        getFileList(ICsProtocolSet.ExtType.image);
+        getFileList(ICsProtocolSet.ExtType.image);*/
     }
     //获取文件列表
     public void getFileList(final String ext){
@@ -78,11 +79,11 @@ public class MainActivity extends Activity {
                 Type listType = new TypeToken<ArrayList<FileInfoModels>>() {}.getType();
                 ArrayList<FileInfoModels>  ls =_gson.fromJson(jsonString, new TypeToken<List<FileInfoModels>>(){}.getType());
                 if (ls!=null && ls.size() > 0)showLongToast(ls.get(0).toString());
-                if (ext.equalsIgnoreCase(ICsProtocolSet.ExtType.video)){
+               /* if (ext.equalsIgnoreCase(ICsProtocolSet.ExtType.video)){
                     mVideoAdapter.updateList(ls);
                 }else {
                     mImageAdapter.updateList(ls);
-                }
+                }*/
             }
             @Override
             public void onCancelled(Callback.CancelledException arg0) {

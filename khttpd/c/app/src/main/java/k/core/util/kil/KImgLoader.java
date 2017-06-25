@@ -82,7 +82,7 @@ public final class KImgLoader {
             if (result.mUri.equals(oldUrl)) {
                 imageView.setImageBitmap(result.mBitmap);
             } else {
-                LOG_W("set image mBitmap,but url has changed, ignored!");
+                LOG_W("set photo mBitmap,but url has changed, ignored!");
             }
         };
     };

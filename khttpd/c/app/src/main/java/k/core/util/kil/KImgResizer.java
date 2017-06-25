@@ -78,7 +78,7 @@ public class KImgResizer {
             return 1;
         }
 
-        // Raw height and width of image
+        // Raw height and width of photo
         final int height = options.outHeight;
         final int width = options.outWidth;
         Log.d(TAG, "origin, w= " + width + " h=" + height);
