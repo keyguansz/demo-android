@@ -36,6 +36,13 @@ import k.httpd.c.act.dshare.dji.R;
 import k.httpd.c.cons.Config;
 import k.httpd.c.cons.ICsProtocolSet;
 
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
+import static k.core.util.kil.KRawImgLoader.MSG.MSG_FINISH;
+import static k.core.util.kil.KRawImgLoader.MSG.MSG_FINISH1;
+import static k.core.util.kil.KRawImgLoader.MSG.MSG_LOADING;
+import static k.core.util.kil.KRawImgLoader.MSG.MSG_Local;
+import static k.httpd.c.cons.ICsProtocolSet.Download.path;
+
 
 /**
  * @author : key.guan @ 2017/6/15 17:33
@@ -45,57 +52,43 @@ import k.httpd.c.cons.ICsProtocolSet;
  * @qa:DISK_CACHE_INDEX作用是啥？ Snapshot为啥不是直接文件的方式？我要拷贝文件出来怎么办？？？
  */
 public final class KRawImgLoader {
-    public void start(HashSet<String> mSelected) {
+
+    private File diskCacheDir;
+
+    public interface CallBack {
+        void onLoading(int objId, int progress);
     }
 
-    public interface CallBack{
-        void onLoading(int progress);
-    }
     private static final String TAG = "KRawImgLoader";
-    private static final int MESSAGE_UPDATE_UI = 1;
-    private static final int MSG_LOADING = 2;
-    private static final int MSG_FINISH = 3;
+
+    public interface MSG {
+        int MESSAGE_UPDATE_UI = 1;
+        int MSG_LOADING = 2;
+        int MSG_FINISH1 = 3;
+        int MSG_Local = 4;
+        int MSG_FINISH = 5;
+        int MSG_select = 10;
+    }
+
     private static final int CPU_COUNT = Runtime.getRuntime()
             .availableProcessors();
     private static final int CORE_POOL_SIZE = CPU_COUNT + 1;
     private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
     private static final long KEEP_ALIVE = 10L;
-    private static final ThreadFactory sThreadFactory = new ThreadFactory(){
+    private static final ThreadFactory sThreadFactory = new ThreadFactory() {
         private final AtomicInteger mCnt = new AtomicInteger(1);
+
         @Override
         public Thread newThread(@NonNull Runnable r) {
-            return new Thread(r, "KRawImgLoader#"+mCnt.getAndIncrement());
+            return new Thread(r, "KRawImgLoader#" + mCnt.getAndIncrement());
         }
     };
     private static final Executor THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(
             CORE_POOL_SIZE, MAXIMUM_POOL_SIZE,
             KEEP_ALIVE, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<Runnable>(),sThreadFactory
+            new LinkedBlockingQueue<Runnable>(), sThreadFactory
     );
-    private Handler mMainHandler = new Handler(Looper.getMainLooper()) {
-        public void handleMessage(Message msg) {
-            if (msg.what == MSG_LOADING){
-                LoaderResult result = (LoaderResult)msg.obj;
-                TextView textView = result.mtextView;
-                String oldUrl = (String) textView.getTag(TAG_KEY_URI);
-                if (result.mUri.equals(oldUrl)) {
-                    textView.setText("progess="+msg.arg1+",arg2="+msg.arg2);
-                } else {
-                    LOG_W("set photo mBitmap,but url has changed, ignored!");
-                }
-            }else if (msg.what == MSG_FINISH){
-                LoaderResult result = (LoaderResult)msg.obj;
-                TextView textView = result.mtextView;
-                String oldUrl = (String) textView.getTag(TAG_KEY_URI);
-                if (result.mUri.equals(oldUrl)) {
-                    textView.setText("MSG_FINISH");
-                } else {
-                    LOG_W("set photo mBitmap,but url has changed, ignored!");
-                }
-            }
-        };
-    };
-        
+
     private DiskLruCache mDiskLruCache;
 
     private static final int TAG_KEY_URI = R.id.raw_uri;
@@ -113,11 +106,11 @@ public final class KRawImgLoader {
     public boolean init(Context ctx) {
         ctx = ctx.getApplicationContext();
         //sdcard/Android/data/pkname/KimageLoader
-        File diskCacheDir = getDiskCacheDir(ctx, TAG);
+        diskCacheDir = getDiskCacheDir(ctx, TAG);
         if (!diskCacheDir.exists()) {
             diskCacheDir.mkdirs();
         }
-        LOG_D("diskCacheDir="+diskCacheDir);
+        LOG_D("diskCacheDir=" + diskCacheDir);
         if (getUsableSpace(diskCacheDir) > DISK_CACHE_SIZE) {
             try {
                 mDiskLruCache = DiskLruCache.open(diskCacheDir, 1, 1, DISK_CACHE_SIZE);
@@ -129,26 +122,119 @@ public final class KRawImgLoader {
         }
         return true;
     }
+
     /**
      * load mBitmap from memory cache or disk cache or network async, then bind mtextView and mBitmap.
      * NOTE THAT: should run in UI Thread
-     * @param uri http url
+     *
+     * @param url      http url
      * @param textView mBitmap's bind object
      */
-  
-    
+
+
     public void setTextView(final String url, final TextView textView) {
         textView.setTag(TAG_KEY_URI, url);//全局唯一的标示
         Runnable loadTask = new Runnable() {
             @Override
             public void run() {
-                if (load(url, textView)){
+                if (load(url, textView)) {
                     LoaderResult result = new LoaderResult(textView, url);
                     mMainHandler.obtainMessage(MSG_FINISH, result).sendToTarget();
                 }
             }
         };
         THREAD_POOL_EXECUTOR.execute(loadTask);
+    }
+    Handler mMainHandler;
+    public void start(final HashSet<String> mSelected ,final Handler handler/*, CallBack cb*/) {
+        Runnable loadTask = new Runnable() {
+            @Override
+            public void run() {
+                int okFileId = 1;
+                int allFileNum = mSelected.size();
+               for (String it : mSelected) {
+                    LOG_D(it);
+                    try {
+                        String key = hashKey(it);
+                        if (mDiskLruCache.get(key) != null){
+                            //下载完成一个文件
+                            handler.obtainMessage(MSG_FINISH1,allFileNum,okFileId).sendToTarget();
+                            okFileId ++;
+                            continue;
+                        }
+                        DiskLruCache.Editor editor = mDiskLruCache.edit(key);
+                        if (editor != null) {
+                            OutputStream outputStream = editor.newOutputStream(DISK_CACHE_INDEX);
+                            boolean isOk = false;
+                            HttpURLConnection urlConnection = null;
+                            BufferedInputStream in = null;
+                            BufferedOutputStream out = null;
+                            try {
+                                HashMap<String, String> parmMap = new HashMap<>(4);
+                                parmMap.put(ICsProtocolSet.Download.path, it);
+                                parmMap.put(ICsProtocolSet.Download.level, "raw");
+                                final URL url = new URL(genParam(Config.SERVER_IP + ICsProtocolSet.Download.DO, parmMap));
+                                urlConnection = (HttpURLConnection) url.openConnection();
+                                in = new BufferedInputStream(urlConnection.getInputStream(), IO_BUFFER_SIZE);
+                                String strFileLen = urlConnection.getHeaderField("fileLen");
+                                out = new BufferedOutputStream(outputStream, IO_BUFFER_SIZE);
+                                long total = urlConnection.getContentLength();
+                                total = Long.parseLong(strFileLen);
+                                int progress = 0,nextProgress = 0;
+                                int len;
+                                int cur = 0;
+                                while ((len = in.read()) != -1) {
+                                    cur = cur + len;
+                                    nextProgress =( int)(cur * 100/ total);
+                                    if (nextProgress != progress){
+                                        progress =  nextProgress;
+                                        handler.obtainMessage(MSG_LOADING, allFileNum,okFileId, progress).sendToTarget();
+                                    }
+
+                                    out.write(len);
+                                }
+                                isOk = true;
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                                LOG("downloadBitmap failed." + ex);
+                            } finally {
+                                if (urlConnection != null) {
+                                    urlConnection.disconnect();
+                                }
+                                KUtils.close(out);
+                                KUtils.close(in);
+                            }
+
+                            if (isOk) {
+                                editor.commit();
+                            } else {
+                                editor.abort();
+                            }
+                            mDiskLruCache.flush();
+                        }
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                        continue;
+                    }
+                    //下载完成一个文件
+                    handler.obtainMessage(MSG_FINISH1,allFileNum,okFileId).sendToTarget();
+                    okFileId ++;
+                }
+                //下载完成所有文件
+                handler.obtainMessage(MSG_FINISH,allFileNum,okFileId).sendToTarget();
+            }
+        };
+        THREAD_POOL_EXECUTOR.execute(loadTask);
+
+    }
+    //递归删除目录中的子文件
+    public void reset() {
+        if (!diskCacheDir.exists()) {
+            String[] children = diskCacheDir.list();
+            for (int i=0; i<children.length; i++) {
+                new File(diskCacheDir, children[i]);
+            }
+        }
     }
 
     private KRawImgLoader() {
@@ -158,14 +244,14 @@ public final class KRawImgLoader {
         boolean externalStorageAvailable = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
         final String cachePath;
         if (externalStorageAvailable) {
-          //  cachePath = context.getExternalCacheDir().getPath();
-            cachePath =  Environment.getExternalStorageDirectory().getAbsolutePath()+ File.separator+"DpadShare";
+            //  cachePath = context.getExternalCacheDir().getPath();
+            cachePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "DpadShare";
         } else {
             cachePath = context.getCacheDir().getPath();
         }
         return new File(cachePath + File.separator + uniqueName);
     }
-    
+
     @TargetApi(Build.VERSION_CODES.GINGERBREAD)
     private long getUsableSpace(File path) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
@@ -175,7 +261,7 @@ public final class KRawImgLoader {
         return statFs.getBlockSize() * statFs.getAvailableBlocks();
     }
 
-    private boolean load(String uri,final TextView textView) {
+    private boolean load(String uri, final TextView textView) {
         boolean bitmap = false;
         try {
             bitmap = loadFromDisk(uri);
@@ -190,7 +276,7 @@ public final class KRawImgLoader {
         }
         return bitmap;
     }
-    
+
 
     private boolean loadFromDisk(String url) throws IOException {
         if (Looper.myLooper() == Looper.getMainLooper()) {
@@ -200,11 +286,11 @@ public final class KRawImgLoader {
             return false;
         }
         String key = hashKey(url);
-        return  mDiskLruCache.get(key) != null;
+        return mDiskLruCache.get(key) != null;
     }
 
     //http
-    private boolean loadFromNet(String url,TextView textView) throws IOException {
+    private boolean loadFromNet(String url, TextView textView) throws IOException {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             throw new RuntimeException("can not visit network from UI Thread.");
         }
@@ -226,29 +312,29 @@ public final class KRawImgLoader {
         return loadFromDisk(url);
     }
 
-    private static String genParam(String url, HashMap<String,String> parmMap){
+    private static String genParam(String url, HashMap<String, String> parmMap) {
         StringBuilder sb = new StringBuilder(url);
         sb.append("?");
-        for (String k :parmMap.keySet()){
+        for (String k : parmMap.keySet()) {
             sb.append(k).append("=").append(parmMap.get(k)).append("&");
         }
-        return sb.substring(0,sb.length()-1);
+        return sb.substring(0, sb.length() - 1);
     }
 
 
     /**
-     *@desc   带参数特殊下载方法
-     *@ref:
-     *@author : key.guan @ 2017/6/19 10:43
+     * @desc 带参数特殊下载方法
+     * @ref:
+     * @author : key.guan @ 2017/6/19 10:43
      */
-    private boolean downFileToStream(String path,TextView textView,
-                                 OutputStream outputStream) {
+    private boolean downFileToStream(String path, TextView textView,
+                                     OutputStream outputStream) {
         HttpURLConnection urlConnection = null;
         BufferedInputStream in = null;
         BufferedOutputStream out = null;
         try {
-            HashMap<String,String> parmMap = new HashMap<>(4);
-            parmMap.put(ICsProtocolSet.Download.path, path);
+            HashMap<String, String> parmMap = new HashMap<>(4);
+            parmMap.put(path, path);
             parmMap.put(ICsProtocolSet.Download.level, "raw");
             final URL url = new URL(genParam(Config.SERVER_IP + ICsProtocolSet.Download.DO, parmMap));
             urlConnection = (HttpURLConnection) url.openConnection();
@@ -260,7 +346,7 @@ public final class KRawImgLoader {
             LoaderResult result = new LoaderResult(textView, path);
             while ((len = in.read()) != -1) {
                 cur = cur + len;
-                mMainHandler.obtainMessage(MSG_LOADING, total, cur,result).sendToTarget();
+                mMainHandler.obtainMessage(MSG_LOADING, total, cur, result).sendToTarget();
                 out.write(len);
             }
             return true;
@@ -276,13 +362,14 @@ public final class KRawImgLoader {
         }
         return false;
     }
-/**
- *@desc  hash文件名作，后缀不变
- *@author : key.guan @ 2017/6/19 17:26
- */
+
+    /**
+     * @desc hash文件名作，后缀不变
+     * @author : key.guan @ 2017/6/19 17:26
+     */
     private String hashKey(String url) {
         int pos = url.lastIndexOf('.');
-        String ext = url.substring(pos+1);
+        String ext = url.substring(pos + 1);
         url = url.substring(0, pos);
         String cacheKey;
         try {
@@ -292,7 +379,7 @@ public final class KRawImgLoader {
         } catch (NoSuchAlgorithmException e) {
             cacheKey = String.valueOf(url.hashCode());
         }
-        return cacheKey+"_raw."+ext;
+        return cacheKey + "_raw." + ext;
     }
 
     private String bytesToHexString(byte[] bytes) {
@@ -306,7 +393,7 @@ public final class KRawImgLoader {
         }
         return sb.toString();
     }
-    
+
     private static class LoaderResult {
         public TextView mtextView;
         public String mUri;

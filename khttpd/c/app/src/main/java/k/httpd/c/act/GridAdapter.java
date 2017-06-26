@@ -70,9 +70,8 @@ public class GridAdapter extends BaseAdapter {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        if (mQSList.get(position).state == ICsProtocolSet.StateType.selected){
-            holder.mImageView.setChecked(true);
-        }
+        holder.mImageView.setChecked( DJIDshareView.mSelected.contains(mQSList.get(position).path));
+
         KImgLoader.getIns().setImageBitmap(mQSList.get(position).path, holder.mImageView.getBgView());
         return convertView;
     }

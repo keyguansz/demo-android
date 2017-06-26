@@ -20,6 +20,7 @@ import org.xutils.http.RequestParams;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import k.core.util.KTextUtil;
 import k.core.util.kil.KRawImgLoader;
@@ -40,6 +41,7 @@ import k.httpd.c.model.FileInfoModels;
 
 public class KExListAdapter extends BaseExpandableListAdapter {
     final ArrayList<FileInfoModels> mData = new ArrayList<>();
+    final HashSet<String> mSelectedPath = new HashSet<>();
     private String mExt;
     private Gson _gson = new Gson();
     private Context mCtx;
@@ -91,11 +93,13 @@ public class KExListAdapter extends BaseExpandableListAdapter {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if ( mData.get(gId).datas.get(position).state == ICsProtocolSet.StateType.init){
                     mData.get(gId).datas.get(position).state = ICsProtocolSet.StateType.selected;
+                    mSelectedPath.add( mData.get(gId).datas.get(position).path);
                     ((KCheckImageView)view).setChecked(true);
                     return;
                 }
                 if ( mData.get(gId).datas.get(position).state == ICsProtocolSet.StateType.selected){
                     mData.get(gId).datas.get(position).state = ICsProtocolSet.StateType.init;
+                    mSelectedPath.remove( mData.get(gId).datas.get(position).path);
                     ((KCheckImageView)view).setChecked(false);
                     return;
                 }

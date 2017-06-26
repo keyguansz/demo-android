@@ -132,8 +132,11 @@ public class HelloServer extends NanoHTTPD {
                 inputStream = new FileInputStream(file);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
-            }//// FIXME: 2017/6/20 怎么传递文件长度呢？
-            response = newChunkedResponse(Status.OK, "application/octet-stream", inputStream);
+            }//// FIXME: 2017/6/20 怎么传递文件长度呢？暂时用这个办法吧，
+            response = newFixedLengthResponse(Status.OK, "application/octet-stream", inputStream, contentLen);
+            response.addHeader("fileLen", ""+contentLen);
+            response.setChunkedTransfer(true);
+          // response = newChunkedResponse(Status.OK, "application/octet-stream", inputStream);
         } else if (ICsProtocolSet.LevelType.nail.equalsIgnoreCase(level)) {//缩略图
             Bitmap bitmap = null;
             if (extType.equalsIgnoreCase(ICsProtocolSet.ExtType.image)) {//图片缩略图
@@ -155,6 +158,7 @@ public class HelloServer extends NanoHTTPD {
         //这代表任意的二进制数据传输。
        
         response.addHeader("Content-Disposition", "attachment; filename=" + "test.java");
+
         return response;
     }
  /*   private String bitmapChangeString(Bitmap bitmap){
