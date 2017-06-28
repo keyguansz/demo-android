@@ -9,7 +9,6 @@ import android.widget.AdapterView;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.GridView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -38,7 +37,7 @@ import k.httpd.c.model.FileInfoModels;
  * 滑动会不流畅有停顿
  * Copyright (c) 2017. DJI All Rights Reserved.
  */
-
+@Deprecated
 public class KExListAdapter extends BaseExpandableListAdapter {
     final ArrayList<FileInfoModels> mData = new ArrayList<>();
     final HashSet<String> mSelectedPath = new HashSet<>();
@@ -139,7 +138,13 @@ public class KExListAdapter extends BaseExpandableListAdapter {
                 Type listType = new TypeToken<ArrayList<FileInfoModels>>() {
                 }.getType();
                 ArrayList<FileInfoModels> ls = _gson.fromJson(jsonString, listType);
-                if (ls != null && ls.size() > 0)
+                if (ls != null && ls.size() > 0){
+                    for (FileInfoModels its :ls){
+                        for (FileInfoModel it : its.datas){//计算出那些已经在本地了
+                            it.isOnDisk = KRawImgLoader.getIns().isOnDisk(it.path);
+                        }
+                    }
+                }
                     //showLongToast(ls.get(0).toString());
                 updateData(ls);
             }

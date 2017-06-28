@@ -34,8 +34,8 @@ public final class KFileScanner {
 
     private static final String[] DIRS = {DATA_ROOT, FLASH_ROOT, SDCARD_ROOT, SDCARD_ROOT1, USB_ROOT, USB_ROOT1};
     private static final String[] IMAGE_EXT = {".png", ".jpg"};//不区分大小写，其他媒体格式？比较的时候，更改
-    private static final String[] VIDEO_EXT = {".mp4"};
-    private static final String[] BOTH_EXT = {".png", ".jpg", ".mp4"};
+    private static final String[] VIDEO_EXT = {".mov",".mp4"};
+    private static final String[] BOTH_EXT = {".png", ".jpg", ".mov", ".mp4"};
     public static String findExtType(final String path){
         String ext = path.substring(path.lastIndexOf('.'),path.length());
         for (String str : IMAGE_EXT){

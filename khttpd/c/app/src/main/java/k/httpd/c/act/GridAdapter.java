@@ -71,6 +71,11 @@ public class GridAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
         holder.mImageView.setChecked( DJIDshareView.mSelected.contains(mQSList.get(position).path));
+        holder.mImageView.setSize(mQSList.get(position).len);
+        if ( KRawImgLoader.getIns().isOnDisk(mQSList.get(position).path) ){
+            holder.mImageView.setEnabled(false);
+            holder.mImageView.setSize(mQSList.get(position).len,"down completead");
+        }
 
         KImgLoader.getIns().setImageBitmap(mQSList.get(position).path, holder.mImageView.getBgView());
         return convertView;

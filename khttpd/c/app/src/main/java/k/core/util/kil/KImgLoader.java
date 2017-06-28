@@ -35,7 +35,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import k.core.util.KTextUtil;
 import k.core.util.KLogUtil;
 import k.core.util.KUtils;
 import k.httpd.c.cons.Config;
@@ -174,7 +173,8 @@ public final class KImgLoader {
         boolean externalStorageAvailable = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
         final String cachePath;
         if (externalStorageAvailable) {
-            cachePath = context.getExternalCacheDir().getPath();
+            cachePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "DpadShare";
+           // cachePath = context.getExternalCacheDir().getPath();
         } else {
             cachePath = context.getCacheDir().getPath();
         }

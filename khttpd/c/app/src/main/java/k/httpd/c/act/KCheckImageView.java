@@ -5,7 +5,9 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
+import k.core.util.KTextUtil;
 import k.httpd.c.act.dshare.dji.R;
 
 public class KCheckImageView extends RelativeLayout {
@@ -13,6 +15,7 @@ public class KCheckImageView extends RelativeLayout {
 	private boolean mOnlyDisable = false;
 	private boolean mChecked;
 	private final View mCheckView;
+	private final TextView mSizeView;
 
 	public ImageView getBgView() {
 		return mBgView;
@@ -33,14 +36,20 @@ public class KCheckImageView extends RelativeLayout {
 		setAlpha(checked ? mStateAlpha : 1.0f );
 		this.checked = checked;
 	}
+	public void setSize(long size) {
+		mSizeView.setText(KTextUtil.formatASize(size));
+	}
+	public void setSize(long size, String str) {
+		mSizeView.setText(KTextUtil.formatASize(size)+":"+str);
+	}
 
 	private boolean checked = false;
-
 	public KCheckImageView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		CommonUtils.addView(this, R.layout.k_check_image_view);
 		mCheckView = findViewById(R.id.k_check_iv);
 		mBgView = (ImageView) findViewById(R.id.k_bg_iv);
+		mSizeView = (TextView) findViewById(R.id.k_check_tv);
 	}
 	@Override
 	protected void drawableStateChanged() {

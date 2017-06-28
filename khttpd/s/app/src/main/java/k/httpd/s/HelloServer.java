@@ -126,17 +126,17 @@ public class HelloServer extends NanoHTTPD {
         }
 
         File file = new File(path);
-        long contentLen = file.length();
+        int contentLen = (int )file.length();//客户端的接口为int类型
         if (ICsProtocolSet.LevelType.raw.equalsIgnoreCase(level)) {//原始图
             try {
                 inputStream = new FileInputStream(file);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }//// FIXME: 2017/6/20 怎么传递文件长度呢？暂时用这个办法吧，
-            response = newFixedLengthResponse(Status.OK, "application/octet-stream", inputStream, contentLen);
-            response.addHeader("fileLen", ""+contentLen);
-            response.setChunkedTransfer(true);
-          // response = newChunkedResponse(Status.OK, "application/octet-stream", inputStream);
+          //  response = newFixedLengthResponse(Status.OK, "application/octet-stream", inputStream, contentLen);//这个值无效的！
+          //  response.setChunkedTransfer(true);这个方法在下载结束符号是有bug的！mov目前传输的是0？？？暂时不要支持这种格式吧
+           response = newChunkedResponse(Status.OK, "application/octet-stream", inputStream);
+            response.addHeader("content-length", ""+contentLen);
         } else if (ICsProtocolSet.LevelType.nail.equalsIgnoreCase(level)) {//缩略图
             Bitmap bitmap = null;
             if (extType.equalsIgnoreCase(ICsProtocolSet.ExtType.image)) {//图片缩略图

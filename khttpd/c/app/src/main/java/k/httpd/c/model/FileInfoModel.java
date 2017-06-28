@@ -14,6 +14,7 @@ public final class FileInfoModel {
     public String mtimeStr;//修改时间
     public long ctime;//创建时间
     public int state;
+    public boolean isOnDisk;
     @Override
     public String toString() {
         StringBuilder sb= new StringBuilder(30);

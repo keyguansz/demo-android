@@ -13,8 +13,6 @@ import android.widget.GridView;
  */
 
 public class KGridView extends GridView {
-
-
     public KGridView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }

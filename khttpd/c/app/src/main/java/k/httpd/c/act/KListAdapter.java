@@ -25,6 +25,7 @@ import k.core.util.kil.KRawImgLoader;
 import k.httpd.c.act.dshare.dji.R;
 import k.httpd.c.cons.Config;
 import k.httpd.c.cons.ICsProtocolSet;
+import k.httpd.c.model.FileInfoModel;
 import k.httpd.c.model.FileInfoModels;
 
 /**
@@ -79,9 +80,14 @@ public class KListAdapter extends BaseAdapter {
         // KWillDo: 2017/6/25 性能？
         mImageAdapter.updateList(mData.get(gId).datas);
         viewHolder.gv.setAdapter(mImageAdapter);
+
         viewHolder.gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (mData.get(gId).datas.get(position).isOnDisk) {
+                    showLongToast("onItemClick, isOnDisk return");
+                    return;
+                }
                 if (mData.get(gId).datas.get(position).state == ICsProtocolSet.StateType.init) {
                     mData.get(gId).datas.get(position).state = ICsProtocolSet.StateType.selected;
                     ((KCheckImageView) view).setChecked(true);
@@ -111,9 +117,14 @@ public class KListAdapter extends BaseAdapter {
                 Type listType = new TypeToken<ArrayList<FileInfoModels>>() {
                 }.getType();
                 ArrayList<FileInfoModels> ls = _gson.fromJson(jsonString, listType);
-                if (ls != null && ls.size() > 0)
-                    //showLongToast(ls.get(0).toString());
+                if (ls != null && ls.size() > 0) {
+                    for (FileInfoModels its : ls) {
+                        for (FileInfoModel it : its.datas) {//计算出那些已经在本地了
+                            it.isOnDisk = KRawImgLoader.getIns().isOnDisk(it.path);
+                        }
+                    }
                     updateData(ls);
+                }
             }
 
             @Override

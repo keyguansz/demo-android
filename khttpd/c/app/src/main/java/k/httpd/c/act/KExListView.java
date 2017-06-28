@@ -13,7 +13,7 @@ import android.widget.ExpandableListView;
  * Description:
  * Copyright (c) 2017. DJI All Rights Reserved.
  */
-
+@Deprecated
 public class KExListView extends ExpandableListView {
     public KExListView(Context context, AttributeSet attrs) {
         super(context, attrs);

@@ -116,8 +116,11 @@ public class DJIDshareView extends LinearLayout {
 
             if (msg.what == KRawImgLoader.MSG.MSG_LOADING) {
 
-            } else if (msg.what == KRawImgLoader.MSG.MSG_FINISH) {
-
+            } else if (msg.what == KRawImgLoader.MSG.MSG_FINISH) {      //完全下载完成，更新ui
+                mSelected.clear();
+                selectTv.setText("selected "+ mSelected.size()+" items");
+                imageAdapter.notifyDataSetChanged();
+                videoAdapter.notifyDataSetChanged();
             }
         }        ;
     };

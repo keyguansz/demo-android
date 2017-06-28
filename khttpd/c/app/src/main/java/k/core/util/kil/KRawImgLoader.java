@@ -6,7 +6,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.os.StatFs;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -36,12 +35,9 @@ import k.httpd.c.act.dshare.dji.R;
 import k.httpd.c.cons.Config;
 import k.httpd.c.cons.ICsProtocolSet;
 
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 import static k.core.util.kil.KRawImgLoader.MSG.MSG_FINISH;
 import static k.core.util.kil.KRawImgLoader.MSG.MSG_FINISH1;
 import static k.core.util.kil.KRawImgLoader.MSG.MSG_LOADING;
-import static k.core.util.kil.KRawImgLoader.MSG.MSG_Local;
-import static k.httpd.c.cons.ICsProtocolSet.Download.path;
 
 
 /**
@@ -92,9 +88,9 @@ public final class KRawImgLoader {
     private DiskLruCache mDiskLruCache;
 
     private static final int TAG_KEY_URI = R.id.raw_uri;
-    private static final long DISK_CACHE_SIZE = 1024 * 1024 * 50;
+    private static final long DISK_CACHE_SIZE = 1024 * 1024 * 200;
     private static final int IO_BUFFER_SIZE = 8 * 1024;
-    private static final int DISK_CACHE_INDEX = 1;
+    private static final int DISK_CACHE_INDEX = 0;//为啥1不可以。。。。
     private boolean mIsDiskLruCacheCreated = false;
 
     private static KRawImgLoader ins = new KRawImgLoader();
@@ -145,68 +141,31 @@ public final class KRawImgLoader {
         };
         THREAD_POOL_EXECUTOR.execute(loadTask);
     }
+
     Handler mMainHandler;
-    public void start(final HashSet<String> mSelected ,final Handler handler/*, CallBack cb*/) {
-        Runnable loadTask = new Runnable() {
+
+    public void start(final HashSet<String> mSelected, final Handler handler/*, CallBack cb*/) {
+       final Runnable loadTask = new Runnable() {
             @Override
             public void run() {
-                int okFileId = 1;
-                int allFileNum = mSelected.size();
-               for (String it : mSelected) {
+                int okFileId = 0;
+                int allFileNum = mSelected.size();//ConcurrentModificationException
+                for (String it : mSelected) {
                     LOG_D(it);
                     try {
                         String key = hashKey(it);
-                        if (mDiskLruCache.get(key) != null){
-                            //下载完成一个文件
-                            handler.obtainMessage(MSG_FINISH1,allFileNum,okFileId).sendToTarget();
-                            okFileId ++;
+                        if (mDiskLruCache.get(key) != null) {  //下载完成一个文件
+                            okFileId++;
+                            handler.obtainMessage(MSG_FINISH1, allFileNum, okFileId).sendToTarget();
                             continue;
                         }
                         DiskLruCache.Editor editor = mDiskLruCache.edit(key);
                         if (editor != null) {
                             OutputStream outputStream = editor.newOutputStream(DISK_CACHE_INDEX);
-                            boolean isOk = false;
-                            HttpURLConnection urlConnection = null;
-                            BufferedInputStream in = null;
-                            BufferedOutputStream out = null;
-                            try {
-                                HashMap<String, String> parmMap = new HashMap<>(4);
-                                parmMap.put(ICsProtocolSet.Download.path, it);
-                                parmMap.put(ICsProtocolSet.Download.level, "raw");
-                                final URL url = new URL(genParam(Config.SERVER_IP + ICsProtocolSet.Download.DO, parmMap));
-                                urlConnection = (HttpURLConnection) url.openConnection();
-                                in = new BufferedInputStream(urlConnection.getInputStream(), IO_BUFFER_SIZE);
-                                String strFileLen = urlConnection.getHeaderField("fileLen");
-                                out = new BufferedOutputStream(outputStream, IO_BUFFER_SIZE);
-                                long total = urlConnection.getContentLength();
-                                total = Long.parseLong(strFileLen);
-                                int progress = 0,nextProgress = 0;
-                                int len;
-                                int cur = 0;
-                                while ((len = in.read()) != -1) {
-                                    cur = cur + len;
-                                    nextProgress =( int)(cur * 100/ total);
-                                    if (nextProgress != progress){
-                                        progress =  nextProgress;
-                                        handler.obtainMessage(MSG_LOADING, allFileNum,okFileId, progress).sendToTarget();
-                                    }
-
-                                    out.write(len);
-                                }
-                                isOk = true;
-                            } catch (IOException ex) {
-                                ex.printStackTrace();
-                                LOG("downloadBitmap failed." + ex);
-                            } finally {
-                                if (urlConnection != null) {
-                                    urlConnection.disconnect();
-                                }
-                                KUtils.close(out);
-                                KUtils.close(in);
-                            }
-
-                            if (isOk) {
-                                editor.commit();
+                            if (downFileToStream(it, allFileNum, okFileId, outputStream, handler)) {
+                                editor.commit();//edit didn't create file 0?
+                                okFileId++;
+                                handler.obtainMessage(MSG_FINISH1, allFileNum, okFileId).sendToTarget();
                             } else {
                                 editor.abort();
                             }
@@ -216,23 +175,82 @@ public final class KRawImgLoader {
                         ex.printStackTrace();
                         continue;
                     }
-                    //下载完成一个文件
-                    handler.obtainMessage(MSG_FINISH1,allFileNum,okFileId).sendToTarget();
-                    okFileId ++;
                 }
                 //下载完成所有文件
-                handler.obtainMessage(MSG_FINISH,allFileNum,okFileId).sendToTarget();
+                handler.obtainMessage(MSG_FINISH, allFileNum, okFileId).sendToTarget();
             }
         };
-        THREAD_POOL_EXECUTOR.execute(loadTask);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                THREAD_POOL_EXECUTOR.execute(loadTask);
+            }
+        }).start();
+
 
     }
-    //递归删除目录中的子文件
+
+    public boolean isOnDisk(String url) {
+        String key = hashKey(url);
+        boolean isOn = false;
+        try {
+            isOn = mDiskLruCache.get(key) != null;
+        } catch (Exception ex) {
+            LOG_D("ex=" + ex);
+        } finally {
+            return isOn;
+        }
+    }
+
+    private boolean downFileToStream(String pathStr, int allFileNum, int fileId,
+                                     OutputStream outputStream, final Handler handler) {
+        HttpURLConnection urlConnection = null;
+        BufferedInputStream in = null;
+        BufferedOutputStream out = null;
+        try {
+            HashMap<String, String> parmMap = new HashMap<>(4);
+            parmMap.put(ICsProtocolSet.Download.path, pathStr);
+            parmMap.put(ICsProtocolSet.Download.level, "raw");
+            final URL url = new URL(genParam(Config.SERVER_IP + ICsProtocolSet.Download.DO, parmMap));
+            urlConnection = (HttpURLConnection) url.openConnection();
+            in = new BufferedInputStream(urlConnection.getInputStream(), IO_BUFFER_SIZE);
+            out = new BufferedOutputStream(outputStream, IO_BUFFER_SIZE);
+            int total = urlConnection.getContentLength();
+            int progress = 0, nextProgress = 0;
+            int len;
+            int cur = 0;
+
+            while ((len = in.read()) != -1) {
+                cur = cur + len;
+                nextProgress = (int) (cur * 100 / total);
+                if (nextProgress != progress) {
+                    progress = nextProgress;
+                    // KWillDo: 2017/6/28 主线程会再这里卡死，为何？用一个listener  
+                    handler.obtainMessage(MSG_LOADING, allFileNum, fileId, progress).sendToTarget();
+                }
+                out.write(len);
+            }
+            return true;
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            LOG("downloadBitmap failed." + ex);
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+            KUtils.close(out);
+            KUtils.close(in);
+        }
+        return false;
+    }
+
+    //删除目录中的子文件
     public void reset() {
-        if (!diskCacheDir.exists()) {
+        if (diskCacheDir.exists()) {
+            LOG_D("reset start" + diskCacheDir);
             String[] children = diskCacheDir.list();
-            for (int i=0; i<children.length; i++) {
-                new File(diskCacheDir, children[i]);
+            for (int i = 0; i < children.length; i++) {
+                new File(diskCacheDir, children[i]).delete();
             }
         }
     }
@@ -245,6 +263,7 @@ public final class KRawImgLoader {
         final String cachePath;
         if (externalStorageAvailable) {
             //  cachePath = context.getExternalCacheDir().getPath();
+            ///sdcard/DpadShare/KRawImgLoader
             cachePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "DpadShare";
         } else {
             cachePath = context.getCacheDir().getPath();
@@ -322,11 +341,6 @@ public final class KRawImgLoader {
     }
 
 
-    /**
-     * @desc 带参数特殊下载方法
-     * @ref:
-     * @author : key.guan @ 2017/6/19 10:43
-     */
     private boolean downFileToStream(String path, TextView textView,
                                      OutputStream outputStream) {
         HttpURLConnection urlConnection = null;
