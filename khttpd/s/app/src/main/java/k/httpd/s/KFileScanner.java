@@ -33,7 +33,7 @@ public final class KFileScanner {
     public static boolean mIsSupportRecursion = true;//是否支持递归扫描
 
     private static final String[] DIRS = {DATA_ROOT, FLASH_ROOT, SDCARD_ROOT, SDCARD_ROOT1, USB_ROOT, USB_ROOT1};
-    private static final String[] IMAGE_EXT = {".png", ".jpg"};//不区分大小写，其他媒体格式？比较的时候，更改
+    private static final String[] IMAGE_EXT = {".png", ".jpg",".bmp"};//不区分大小写，其他媒体格式？比较的时候，更改
     private static final String[] VIDEO_EXT = {".mov",".mp4"};
     private static final String[] BOTH_EXT = {".png", ".jpg", ".mov", ".mp4"};
     public static String findExtType(final String path){

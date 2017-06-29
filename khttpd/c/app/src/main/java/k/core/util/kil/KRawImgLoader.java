@@ -145,7 +145,7 @@ public final class KRawImgLoader {
     Handler mMainHandler;
 
     public void start(final HashSet<String> mSelected, final Handler handler/*, CallBack cb*/) {
-       final Runnable loadTask = new Runnable() {
+        final Runnable loadTask = new Runnable() {
             @Override
             public void run() {
                 int okFileId = 0;
@@ -215,18 +215,24 @@ public final class KRawImgLoader {
             urlConnection = (HttpURLConnection) url.openConnection();
             in = new BufferedInputStream(urlConnection.getInputStream(), IO_BUFFER_SIZE);
             out = new BufferedOutputStream(outputStream, IO_BUFFER_SIZE);
-            int total = urlConnection.getContentLength();
-            int progress = 0, nextProgress = 0;
+            long total = urlConnection.getContentLength();
+            long progress = 0, nextProgress = 0;
             int len;
-            int cur = 0;
+            long cur = 0;
 
             while ((len = in.read()) != -1) {
                 cur = cur + len;
                 nextProgress = (int) (cur * 100 / total);
                 if (nextProgress != progress) {
                     progress = nextProgress;
-                    // KWillDo: 2017/6/28 主线程会再这里卡死，为何？用一个listener  
+                    // KWillDo: 2017/6/28 主线程会再这里卡死，因为msg发送太多了，主线程处理不过来了
+                    if (handler.hasMessages(MSG_LOADING)) {
+                        handler.removeMessages(MSG_LOADING);
+                    }
                     handler.obtainMessage(MSG_LOADING, allFileNum, fileId, progress).sendToTarget();
+
+                    LOG_D("MSG_LOADING,allFileNum=" + allFileNum + ",fileId=" + fileId + ",progress=" + progress + "," +
+                            "len=" + len + ",cur=" + cur + ",total=" + total);
                 }
                 out.write(len);
             }

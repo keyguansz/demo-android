@@ -136,7 +136,10 @@ public class HelloServer extends NanoHTTPD {
           //  response = newFixedLengthResponse(Status.OK, "application/octet-stream", inputStream, contentLen);//这个值无效的！
           //  response.setChunkedTransfer(true);这个方法在下载结束符号是有bug的！mov目前传输的是0？？？暂时不要支持这种格式吧
            response = newChunkedResponse(Status.OK, "application/octet-stream", inputStream);
+            //每次读取的字节数目为100b-200b，太慢了吧？客户端开的是8K，
+            // KWillDo: 2017/6/29
             response.addHeader("content-length", ""+contentLen);
+            response.addHeader("Accept-Ranges", "bytes");//没啥用呢？
         } else if (ICsProtocolSet.LevelType.nail.equalsIgnoreCase(level)) {//缩略图
             Bitmap bitmap = null;
             if (extType.equalsIgnoreCase(ICsProtocolSet.ExtType.image)) {//图片缩略图
