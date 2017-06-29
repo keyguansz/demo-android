@@ -6,6 +6,12 @@
     android:layout_height="match_parent"
     android:background="@android:color/white"
     android:orientation="vertical">
+   <TextView
+       android:id="@+id/test_down_file"
+       android:layout_width="60dp"
+       android:text="test_down_file"
+       android:background="@android:color/holo_red_light"
+       android:layout_height="60dp"/>
    <k.httpd.c.act.DJIDshareView
        android:layout_width="match_parent"
        android:layout_height="match_parent"/>

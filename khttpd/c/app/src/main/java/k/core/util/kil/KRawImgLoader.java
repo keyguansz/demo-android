@@ -180,14 +180,7 @@ public final class KRawImgLoader {
                 handler.obtainMessage(MSG_FINISH, allFileNum, okFileId).sendToTarget();
             }
         };
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                THREAD_POOL_EXECUTOR.execute(loadTask);
-            }
-        }).start();
-
-
+        THREAD_POOL_EXECUTOR.execute(loadTask);
     }
 
     public boolean isOnDisk(String url) {

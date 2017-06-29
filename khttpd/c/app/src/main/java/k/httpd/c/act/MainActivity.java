@@ -46,6 +46,12 @@ public class MainActivity extends Activity {
     }
 
     private void initView() {
+        findViewById(R.id.test_down_file).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                download();
+            }
+        });
       /*  GridView gv = (GridView) findViewById(R.id.gv_image);
         mImageAdapter = new GridAdapter(this, ICsProtocolSet.ExtType.image);
         gv.setAdapter(mImageAdapter);
@@ -99,26 +105,47 @@ public class MainActivity extends Activity {
             }
         });
     }
-    //获取文件列表
-    public void downlaod(){
+    //获取文件列表,测试ok，试试afinal吧，
+    public void download(){
         RequestParams params=new RequestParams(Config.SERVER_IP+ ICsProtocolSet.Download.DO);
-        org.xutils.x.http().get(params, new Callback.CommonCallback<File>() {
+        params.addQueryStringParameter(ICsProtocolSet.Download.path, "/mnt/internal_sd/Screenshots/Screenshot_2013-01-24-22-47-44.png");
+        params.addQueryStringParameter(ICsProtocolSet.Download.level, "raw");
+        params.setSaveFilePath("/sdcard/test.png");
+        org.xutils.x.http().post(params, new Callback.ProgressCallback<File>() {
             @Override
-            public void onSuccess(File jsonString) {
-                showLongToast("jsonString="+jsonString);
+            public void onSuccess(File file) {
 
             }
+
             @Override
-            public void onCancelled(Callback.CancelledException arg0) {
-                showLongToast("onCancelled");
+            public void onError(Throwable throwable, boolean b) {
+
             }
+
             @Override
-            public void onError(Throwable t, boolean arg1) {
-                showLongToast("onError");
+            public void onCancelled(CancelledException e) {
+
             }
+
             @Override
             public void onFinished() {
-                showLongToast("onFinished");
+
+            }
+
+            @Override
+            public void onWaiting() {
+
+            }
+
+            @Override
+            public void onStarted() {
+
+            }
+
+            @Override
+            public void onLoading(long total, long current, boolean isDownloading) {
+                Log.e("x.http()", "current=" + current+",total="+total);
+
             }
         });
     }
