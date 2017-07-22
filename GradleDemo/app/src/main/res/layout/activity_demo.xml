@@ -15,6 +15,11 @@
             android:hint="Name"
             android:inputType="textPersonName"
             />
+    <TextView
+        android:id="@+id/tx"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="jump to DemoYst1Activity"/>
 
 
     </RelativeLayout>
