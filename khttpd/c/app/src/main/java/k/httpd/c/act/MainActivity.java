@@ -17,8 +17,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import k.core.util.kil.KImgLoader;
-import k.core.util.kil.KRawImgLoader;
+import k.core.util.kil.NailFileLoader;
+import k.core.util.kil.RawFileLoader;
+import k.httpd.c.DApManager;
 import k.httpd.c.act.dshare.dji.R;
 import k.httpd.c.cons.Config;
 import k.httpd.c.cons.ICsProtocolSet;
@@ -39,10 +40,11 @@ public class MainActivity extends Activity {
         org.xutils.x.Ext.init(getApplication());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.act_main);
-        KImgLoader.getIns().init(this);
-        KRawImgLoader.getIns().init(this);
-
+        NailFileLoader.getIns().init(this);
+        RawFileLoader.getIns().init(this);
+        DApManager.getIns().init(this);
         initView();
+
     }
 
     private void initView() {
