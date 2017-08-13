@@ -33,20 +33,14 @@ package k.httpd.s;
  * #L%
  */
 
-import android.os.Environment;
-import android.os.SystemClock;
+import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
+import android.media.ThumbnailUtils;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.logging.Logger;
 
 import org.nanohttpd.protocols.http.IHTTPSession;
 import org.nanohttpd.protocols.http.NanoHTTPD;
@@ -55,19 +49,33 @@ import org.nanohttpd.protocols.http.response.Response;
 import org.nanohttpd.protocols.http.response.Status;
 import org.nanohttpd.util.ServerRunner;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import k.httpd.s.cons.Config;
 import k.httpd.s.model.FileInfoModel;
+import k.httpd.s.model.FileInfoModels;
 import k.httpd.s.model.RetModel;
 
 import static org.nanohttpd.protocols.http.response.Response.newChunkedResponse;
+import static org.nanohttpd.protocols.http.response.Response.newFixedLengthResponse;
 
 /**
  * An example of subclassing NanoHTTPD to make a custom HTTP server.
+ * https://confluence.djicorp.com/pages/viewpage.action?pageId=10937987
  */
 public class HelloServer extends NanoHTTPD {
     protected Gson _gson = new GsonBuilder()
             .setDateFormat("yyyy-MM-dd HH:mm:ss")
             .create();
+    private KFileScanner mKFileScanner = new KFileScanner();
     private RetModel rt = new RetModel();
 
     /**
@@ -99,41 +107,88 @@ public class HelloServer extends NanoHTTPD {
             return null;
         }
         String action = uri.substring(1);
-        if (action.equals(IActionSet.getFileList)) {
-            return Response.newFixedLengthResponse(handleGetFileList(param));
-        } else if (action.equals(IActionSet.Download)) {
+        if (action.equals(ICsProtocolSet.getFileList.DO)) {
+            return handleGetFileList(param);
+        } else if (action.equals(ICsProtocolSet.Download.DO)) {
             return handleDownload(param);
         }
         return null;
     }
 
     private Response handleDownload(Map<String, String> param) {
-        InputStream inputStream;
+        InputStream inputStream = null;
         Response response = null;
-        try {
-
-            inputStream = new FileInputStream(new File(Environment.getExternalStorageDirectory().getPath()+"/ScreenShots/1.png"));
-            response = newChunkedResponse(Status.OK, "application/octet-stream", inputStream);//这代表任意的二进制数据传输。
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        String path = param.get("path");
+        String level = param.get("level");
+        String extType = KFileScanner.findExtType(path);
+        if (TextUtils.isEmpty(level)) {
+            level = ICsProtocolSet.LevelType.raw;
         }
+
+        File file = new File(path);
+        int contentLen = (int )file.length();//客户端的接口为int类型
+        if (ICsProtocolSet.LevelType.raw.equalsIgnoreCase(level)) {//原始图
+            try {
+                inputStream = new FileInputStream(file);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }//// FIXME: 2017/6/20 怎么传递文件长度呢？暂时用这个办法吧，
+          //  response = newFixedLengthResponse(Status.OK, "application/octet-stream", inputStream, contentLen);//这个值无效的！
+          //  response.setChunkedTransfer(true);这个方法在下载结束符号是有bug的！mov目前传输的是0？？？暂时不要支持这种格式吧
+           response = newChunkedResponse(Status.OK, "application/octet-stream", inputStream);
+            //每次读取的字节数目为100b-200b，太慢了吧？客户端开的是8K，
+            // KWillDo: 2017/6/29
+            response.addHeader("content-length", ""+contentLen);
+            response.addHeader("Accept-Ranges", "bytes");//没啥用呢？
+        } else if (ICsProtocolSet.LevelType.nail.equalsIgnoreCase(level)) {//缩略图
+            Bitmap bitmap = null;
+            if (extType.equalsIgnoreCase(ICsProtocolSet.ExtType.image)) {//图片缩略图
+                bitmap = ThumbnailUtils.extractThumbnail(KImgResizer.decode(path), 120, 120);
+            } else if (extType.equalsIgnoreCase(ICsProtocolSet.ExtType.video)) {//视频缩略图
+                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                retriever.setDataSource(path);
+                bitmap = retriever.getFrameAtTime();
+            }
+            try {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                inputStream = new ByteArrayInputStream(baos.toByteArray());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            response = newChunkedResponse(Status.OK, "application/octet-stream", inputStream);
+        }
+        //这代表任意的二进制数据传输。
+       
         response.addHeader("Content-Disposition", "attachment; filename=" + "test.java");
+
         return response;
     }
-
-    private String handleGetFileList(Map<String, String> param) {
-        ArrayList<FileInfoModel> rtLs = new ArrayList<>(Config.pageSize);
-        int pageId = 0;
-        //   File f = new File(Config.FileDir);
-        //  if (f.listFiles())
-        for (int i = 0; i < Config.pageSize; i++) {
-            FileInfoModel model = new FileInfoModel();
-            model.len = 100 + i * 500;
-            model.path = "path" + i;
-            model.mtime = SystemClock.currentThreadTimeMillis();
-            rtLs.add(model);
+ /*   private String bitmapChangeString(Bitmap bitmap){
+        if(bitmap != null){
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+            String str = new String(Base64.encode(baos.toByteArray()));
+            return str;
         }
-        rt.setMsg(_gson.toJson(rtLs));
-        return _gson.toJson(rt);
+        return null;
+    }*/
+
+    private Response handleGetFileList(Map<String, String> param) {
+        String rtJs = "";
+        String ext = param.get(ICsProtocolSet.getFileList.ext);
+        String order = param.get(ICsProtocolSet.getFileList.order);
+        if (ICsProtocolSet.OrderType.no.equalsIgnoreCase(order)){//不分组
+            ArrayList<FileInfoModel>  rtLs = mKFileScanner.start(ext);
+            rtJs =  _gson.toJson(rtLs);
+        }else {
+            ArrayList<FileInfoModels> rtLs = mKFileScanner.start(ext, order);
+            rtJs =  _gson.toJson(rtLs);
+        }
+        Log.e("TEst", "rtJs" + ": " +rtJs);
+        //// TODO: 2017/6/19
+        ;//rt客户端解析失败？
+        return  newFixedLengthResponse(Status.OK, "application/json",rtJs);
     }
+
 }

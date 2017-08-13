@@ -11,13 +11,14 @@ def manifestPlaceholders2 = [packagePlace: applicationId2, applicationLabel: "@s
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "24.0.2"
+    buildToolsVersion '25.0.0'
     defaultConfig {
         applicationId "k.demo.gradle"
         minSdkVersion 22
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
     }
     signingConfigs{
         kConfig{
@@ -87,6 +88,40 @@ android {
             manifestPlaceholders = manifestPlaceholders2
         }
     }*/
+    productFlavors {
+        yst1 {
+            applicationId = "k.demo.gradle"
+            buildConfigField "int", "BUILD_YST", "1"
+        }
+        yst2 {
+            buildConfigField "int", "BUILD_YST", "2"
+        }
+        yst3 {
+            buildConfigField "int", "BUILD_YST", "3"
+        }
+    }
+    sourceSets {
+       /* main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src', 'src_dpad', 'v2']
+            resources.srcDirs = ['gen']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+            jni.srcDirs = [] // This prevents the auto generation of Android.mk
+            jniLibs.srcDir 'libs' // This is not necessary unless you have precompiled libraries in your project.
+        }*/
+        yst1 {
+            manifest.srcFile './src/main/AndroidManifestYst1.xml'
+            assets.srcDirs = ['assets_djipad']
+            res.srcDirs = ['res_phone']
+        }
+        yst2 {
+            manifest.srcFile 'AndroidManifestYst2.xml'
+            assets.srcDirs = ['assets_djipad']
+            res.srcDirs = ['res_phone', 'res_tablet', "res_yst2"]
+        }
+    }
 }
 
 dependencies {

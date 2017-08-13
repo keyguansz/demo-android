@@ -40,6 +40,14 @@ public class KImgResizer {
         options.inJustDecodeBounds = false;
         return BitmapFactory.decodeFileDescriptor(fd, null, options);
     }
+    public static Bitmap decode(String path, int reqW, int reqH) {
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(path, options);
+        options.inSampleSize = getSampleSize(options, reqW, reqH);
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFile(path, options);
+    }
     private static int getSampleSize(BitmapFactory.Options options,int reqW, int reqH){
         if (reqW == 0 || reqH == 0) {
             return 1;
@@ -70,7 +78,7 @@ public class KImgResizer {
             return 1;
         }
 
-        // Raw height and width of image
+        // Raw height and width of photo
         final int height = options.outHeight;
         final int width = options.outWidth;
         Log.d(TAG, "origin, w= " + width + " h=" + height);

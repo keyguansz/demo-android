@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/GradleDemo.iml" filepath="$PROJECT_DIR$/GradleDemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/klib/klib.iml" filepath="$PROJECT_DIR$/klib/klib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/klib/klib.iml" filepath="$PROJECT_DIR$/klib/klib.iml" />
     </modules>
   </component>
 </project>
